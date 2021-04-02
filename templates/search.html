@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if books %}
+<table>
+    {% for row in books %}
+    <tr>
+        {% for book in row %}
+            <td align="center" width="30%">
+                <img src="{{ book[2] }}"><br><br>
+                <strong>{{ book[0] }}</strong><br><br>
+                {{ book[1] }}<br><br>
+            </td>
+        {% endfor %}
+    <tr>
+    {% endfor %}
+</table>
+{% else %}
+<h2>По Вашему запросу ничего не найдено.</h2>
+{% endif %}
+{% endblock %}
