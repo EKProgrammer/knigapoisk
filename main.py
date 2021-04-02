@@ -22,8 +22,8 @@ def index():
 @app.route('/search/<q>', methods=['GET', 'POST'])
 def search(q):
     # q - книга, langRestrict - язык
-    response = requests.get(f"https://www.googleapis.com/books/v1/volumes?q={q}&langRestrict=ru").json()
-    # print(response)
+    response = requests.get(f"https://www.googleapis.com/books/v1/volumes?q={q}&langRestrict=ru&maxResults=40").json()
+    print(response)
     # Собираю данные из запроса и формурую таблицу с 3 столбцами
     # В ячейке - миниатюра, название книги и автор
     books = []
@@ -45,9 +45,13 @@ def search(q):
                     authors = ', '.join(info['authors'])
                 else:
                     authors = 'Автор не известен'
+                if 'imageLinks' in info:
+                    img = info['imageLinks']['thumbnail']
+                else:
+                    img = '/static/img/default_img_book.jpg'
                 row.append([info['title'],
                             authors,
-                            info['imageLinks']['thumbnail']])
+                            img])
             books.append(row)
 
     form = SearchForm()
