@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Профиль</h1>
+    <table style="width: 100%">
+        <tr>
+            <td style="width: 50%">
+                <img src="/static/img/default_person_img.png">
+            </td>
+            <td style="width: 50%">
+                <h3>Фамилия</h3>
+                <h5>{{ user["surname"] }}</h5>
+                <h3>Имя</h3>
+                <h5>{{ user["name"] }}</h5>
+                <h3>Почта</h3>
+                <h5>{{ user["email"] }}<h3>
+                <h3>Возраст</h3>
+                <h5>{{ user["age"] }}</h5>
+                <h3>О себе</h3>
+                <h5>{{ user["about"] }}</h5>
+            </td>
+        </tr>
+    </table>
+{% endblock %}
