@@ -20,10 +20,10 @@
 </head>
 <body>
 
-<header style="z-index: 9999999999;">
+<header style="z-index: 9999999999; max-height: 100px; overflow: hidden">
 
 
-	<div style="z-index: 99999;background-color: #506cf0" class="nava" role='navigation'>
+	<div style="z-index: 99999;background-color: #506cf0; max-height: 100px; overflow: hidden" class="nava" role='navigation'>
   <img style="width:16%;margin:0;margin-top:2%;margin-left:4%;" src="static/img/logo.png">
     <ul>
         <li><a href="#">Главная</a></li>
@@ -45,8 +45,8 @@
         {% else %}
             <!-- Неавторизованный пользователь  -->
             <p>
-            <li><a href="comands.php">Зарегистрироваться <!-- <p style="font-size: 12px;margin-top:0%">Новичек</p> !--></a></li>
-            <li><a href="comands.php">Войти <!-- <p style="font-size: 12px;margin-top:0%">Новичек</p> !--></a></li>
+            <li><a href="/register">Зарегистрироваться <!-- <p style="font-size: 12px;margin-top:0%">Новичек</p> !--></a></li>
+            <li><a href="/login">Войти <!-- <p style="font-size: 12px;margin-top:0%">Новичек</p> !--></a></li>
             </p>
         {% endif %}
 
