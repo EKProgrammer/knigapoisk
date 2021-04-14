@@ -14,18 +14,18 @@ def abort_if_news_not_found(books_id):
 
 
 class BooksResource(Resource):
-    def get(self, jobs_id):
-        abort_if_news_not_found(jobs_id)
+    def get(self, books_id):
+        abort_if_news_not_found(books_id)
         session = db_session.create_session()
-        books = session.query(Books).get(jobs_id)
+        books = session.query(Books).get(books_id)
         return jsonify({'books': books.to_dict(
             only=('id', 'title', 'author', 'genre', 'img_url',
                   'year_of_publishing', 'description', 'preview_url'))})
 
-    def delete(self, jobs_id):
-        abort_if_news_not_found(jobs_id)
+    def delete(self, books_id):
+        abort_if_news_not_found(books_id)
         session = db_session.create_session()
-        books = session.query(Books).get(jobs_id)
+        books = session.query(Books).get(books_id)
         session.delete(books)
         session.commit()
         return jsonify({'success': 'OK'})

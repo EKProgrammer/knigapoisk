@@ -1,18 +1,24 @@
 from flask import Flask, render_template, redirect, request
-from random import choice
-import requests
 from flask_restful import Api
 from flask_login import LoginManager, login_user, login_required
 from flask_login import logout_user, current_user
-from requests import get
+
+import requests
+from requests import get, post
+
+from random import choice
+from PIL import Image
+from shutil import copy
+
 
 # поговорки
 from data.sayings import SAYINGS
+
 from data import db_session, users_resource, books_resource
 from forms.registerform import RegisterForm
 from forms.loginform import LoginForm
+from forms.editform import EditForm
 from data.users import User
-
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -75,12 +81,60 @@ def search(q):
                            books=books, title='Поиск')
 
 
-@app.route('/profile')
+@app.route('/book_information/<google_book_id>')
+def book_information(google_book_id):
+    pass
+
+
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
+    if request.method == 'POST':
+        paths = [[f'static/img/profile_img/{current_user.id}.png', (500, 500)],
+                 [f'static/img/profile_img/{current_user.id}_mini.png', (100, 100)]]
+        file = request.files['file'].read()
+        for path, sizes in paths:
+            with open(path, 'wb') as f:
+                f.write(file)
+            img = Image.open(path)
+            resize_img = img.resize(sizes)
+            resize_img.save(path)
+
+    headers = {'surname': 'Фамилия', 'name': 'Имя', 'email': 'Почта',
+               'age': 'Возраст', 'about': 'О себе'}
     user = get(f'http://localhost:5000/api/users/{current_user.id}').json()['users']
-    return render_template('profile.html', user=user,
+    return render_template('profile.html', user=user, headers=headers,
                            title='Профиль', saying=choice(SAYINGS))
+
+
+# не работает
+@app.route('/profile/edit', methods=['GET', 'POST'])
+@login_required
+def edit_user():
+    user = get(f'http://localhost:5000/api/users/{current_user.id}').json()['users']
+    form = EditForm()
+
+    if request.method == "GET":
+        form.surname.data = user['surname']
+        form.name.data = user['name']
+        form.email.data = user['email']
+        form.age.data = user['age']
+        form.about.data = user['about']
+        form.submit.label.text = 'Редактировать'
+
+    elif request.method == "POST":
+
+        if form.validate_on_submit():
+            post(f'http://localhost:5000/api/users/{current_user.id}', json={
+                    'surname': form.surname.data,
+                    'name': form.name.data,
+                    'email': form.email.data,
+                    'age': form.age.data,
+                    'about': form.about.data})
+            return redirect('/profile')
+
+    return render_template('register.html', title='Редактирование профиля',
+                           registerform=form, saying=choice(SAYINGS))
 
 
 @login_manager.user_loader
@@ -128,6 +182,14 @@ def register():
         db_sess.add(user)
         db_sess.commit()
         login_user(user, remember=form.remember_me.data)
+
+        default_path = 'static/img/default_person_img.png'
+        copy(default_path, f'static/img/profile_img/{current_user.id}.png')
+        mini_path = f'static/img/profile_img/{current_user.id}_mini.png'
+        copy(default_path, mini_path)
+        img = Image.open(mini_path)
+        resize_img = img.resize((100, 100))
+        resize_img.save(mini_path)
         return redirect("/")
     return render_template('register.html', registerform=form,
                            title='Регистрация', saying=choice(SAYINGS))

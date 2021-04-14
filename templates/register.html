@@ -31,6 +31,7 @@
                 </div>
             {% endfor %}
         </p>
+        {% if title != "Редактирование профиля" %}
         <p>
             {{ registerform.password.label }}<br>
             {{ registerform.password(class="form-control", type="password") }}<br>
@@ -40,6 +41,7 @@
                 </div>
             {% endfor %}
         </p>
+        {% endif %}
         <p>
             {{ registerform.age.label }}<br>
             {{ registerform.age(class="form-control", type="integer") }}<br>

@@ -18,9 +18,6 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     age = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     about = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    # with open('static/img/default_person_img.png', 'rb') as file:
-    #     bfile = file.read()
-    # avatar = sqlalchemy.Column(sqlalchemy.BLOB, default=bfile)
 
     books = orm.relation("Books", back_populates='user')
 
