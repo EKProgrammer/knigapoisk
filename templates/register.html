@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Регистрация</h1>
+    <form action="" method="post">
+        {{ registerform.hidden_tag() }}
+        <p>
+            {{ registerform.surname.label }}<br>
+            {{ registerform.surname(class="form-control", type="string") }}<br>
+            {% for error in registerform.surname.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p>
+            {{ registerform.name.label }}<br>
+            {{ registerform.name(class="form-control", type="string") }}<br>
+            {% for error in registerform.name.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p>
+            {{ registerform.email.label }}<br>
+            {{ registerform.email(class="form-control", type="email") }}<br>
+            {% for error in registerform.email.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        {% if title != "Редактирование профиля" %}
+        <p>
+            {{ registerform.password.label }}<br>
+            {{ registerform.password(class="form-control", type="password") }}<br>
+            {% for error in registerform.password.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        {% endif %}
+        <p>
+            {{ registerform.age.label }}<br>
+            {{ registerform.age(class="form-control", type="integer") }}<br>
+            {% for error in registerform.age.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p>
+            {{ registerform.about.label }}<br>
+            {{ registerform.about(class="form-control", type="string") }}<br>
+            {% for error in registerform.about.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p>{{ registerform.remember_me() }} {{ registerform.remember_me.label }}</p>
+        <p>{{ registerform.submit(type="submit", class="btn btn-primary") }}</p>
+        <div>{{ message }}</div>
+    </form>
+{% endblock %}

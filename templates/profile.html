@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+    <h1>Профиль</h1>
+    <table style="width: 100%">
+
+
+        <tr>
+            <td style="width: 50%">
+                <img src="/static/img/profile_img/{{ current_user.id }}.png">
+                <div>
+                    <form class="login_form" method="post" enctype="multipart/form-data" name="loadimg">
+                        <br>
+                        <div class="form-group">
+                            <label for="photo">Добавить картинку (500x500)</label><br>
+                            <br>
+                            <input type="file" class="form-control-file" id="photo" name="file" required>
+                        </div>
+                        <br>
+                        <button type="submit" class="btn btn-primary">Загрузить</button>
+                        <br>
+                    </form>
+                </div>
+
+
+            </td>
+            <td style="width: 50%" align="left" valign="top">
+                {% for key in headers %}
+                <h3>{{ headers[key] }}</h3>
+                {% if not user[key] %}
+                <h5>Не указано</h5>
+                {% else %}
+                <h5>{{ user[key] }}</h5>
+                {% endif %}
+                {% endfor %}
+            </td>
+        </tr>
+
+
+    </table>
+    <br>
+
+    <!-- Добавить редактирование!!!! -->
+    <a class="btn btn-outline-success" href="/profile/edit">Редактировать профиль</a>
+    <!-- Добавить удаление!!!! -->
+    <a class="btn btn-outline-danger" href="/profile/delete">Удалить профиль</a>
+
+
+{% endblock %}
