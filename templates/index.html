@@ -16,7 +16,7 @@
 
 
 </head>
-<body>
+<body style="margin: 0;">
 
 <header style="z-index: 9999999999; max-height: 100px; overflow: hidden">
 
@@ -24,7 +24,7 @@
 	<div style="z-index: 99999;background-color: #506cf0; max-height: 100px; overflow: hidden" class="nava" role='navigation'>
   <img style="width:16%;margin:0;margin-top:2%;margin-left:4%;" src="static/img/logo.png">
     <ul>
-        <li><a href="#">Главная</a></li>
+        <li><a href="/">Главная</a></li>
 
         {% if current_user.is_authenticated %}
             <!-- Авторизованный пользователь  -->
