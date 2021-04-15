@@ -26,6 +26,8 @@ api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+API_SERVER = "https://www.googleapis.com/books/v1/volumes"
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -37,7 +39,6 @@ def index():
 
 @app.route('/search/<q>', methods=['GET', 'POST'])
 def search(q):
-    api_server = "https://www.googleapis.com/books/v1/volumes"
     # q - книга, langRestrict - язык
     params = {
         "q": f'"{q}"',
@@ -45,7 +46,7 @@ def search(q):
         "maxResults": 40,
         "key": 'AIzaSyDhh89odNoM6HWTlJQzfQ-_tbYHf-jncdQ'
     }
-    response = requests.get(api_server, params=params).json()
+    response = requests.get(API_SERVER, params=params).json()
     print(response)
     # Собираю данные из запроса и формурую таблицу с 3 столбцами
     # В ячейке - миниатюра, название книги и автор
@@ -72,33 +73,65 @@ def search(q):
                     img = info['imageLinks']['thumbnail']
                 else:
                     img = '/static/img/default_img_book.png'
-                row.append([info['title'], authors, img])
+                row.append([info['title'], authors, img, book['id']])
             books.append(row)
 
     if request.method == 'POST' and request.form['q']:
-        return redirect(f"/search/{request.form['q']}")
+         return redirect(f"/search/{request.form['q']}")
     return render_template('search.html', saying=choice(SAYINGS),
                            books=books, title='Поиск')
 
 
-@app.route('/book_information/<google_book_id>')
+@app.route('/book_information/<google_book_id>', methods=['GET', 'POST'])
 def book_information(google_book_id):
-    return '123456789'
+    if request.method == 'POST' and request.form['q']:
+         return redirect(f"/search/{request.form['q']}")
+    response = requests.get(API_SERVER + '/' + google_book_id,
+                            params={"langRestrict": 'ru'}).json()
+    print(response)
+    book = {}
+    img = None
+    link = None
+    if 'volumeInfo' in response:
+        data = response['volumeInfo']
+        if 'imageLinks' in data:
+            img = data['imageLinks']['thumbnail']
+        else:
+            img = '/static/img/default_img_book.png'
+        book['Название'] = data['title']
+        if 'authors' in data:
+            book['Авторы'] = ', '.join(data['authors'])
+        else:
+            book['Авторы'] = 'Отсутствуют'
+        if 'publishedDate' in data:
+            book['Дата публикации'] = data['publishedDate']
+        else:
+            book['Дата публикации'] = 'Отсутствует'
+        if 'description' in data:
+            book['Описание'] = data['description']
+        else:
+            book['Описание'] = 'Отсутствует'
+        if 'categories' in data:
+            book['Категории'] = ', '.join(data['categories'])
+        else:
+            book['Категории'] = 'Отсутствуют'
+        link = data['previewLink']
+    return render_template('book.html', saying=choice(SAYINGS),
+                           book=book, img=img, link=link,
+                           title='Информация о книге')
 
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
     if request.method == 'POST':
-        paths = [[f'static/img/profile_img/{current_user.id}.png', (500, 500)],
-                 [f'static/img/profile_img/{current_user.id}_mini.png', (100, 100)]]
+        path = f'static/img/profile_img/{current_user.id}.png'
         file = request.files['file'].read()
-        for path, sizes in paths:
-            with open(path, 'wb') as f:
-                f.write(file)
-            img = Image.open(path)
-            resize_img = img.resize(sizes)
-            resize_img.save(path)
+        with open(path, 'wb') as f:
+            f.write(file)
+        img = Image.open(path)
+        resize_img = img.resize((500, 500))
+        resize_img.save(path)
 
     headers = {'surname': 'Фамилия', 'name': 'Имя', 'email': 'Почта',
                'age': 'Возраст', 'about': 'О себе'}
@@ -185,11 +218,6 @@ def register():
 
         default_path = 'static/img/default_person_img.png'
         copy(default_path, f'static/img/profile_img/{current_user.id}.png')
-        mini_path = f'static/img/profile_img/{current_user.id}_mini.png'
-        copy(default_path, mini_path)
-        img = Image.open(mini_path)
-        resize_img = img.resize((100, 100))
-        resize_img.save(mini_path)
         return redirect("/")
     return render_template('register.html', registerform=form,
                            title='Регистрация', saying=choice(SAYINGS))

@@ -63,8 +63,8 @@
                     <input name="q" class="form-control me-2" type="search"
                            placeholder="Поиск книг" aria-label="Search" required>
                     <button class="btn btn-outline-secondary" type="submit">Искать</button>
-                </form>
-
+        </form>
+        <br><br>
         {% if books %}
     <table>
         {% for row in books %}
@@ -72,7 +72,7 @@
             {% for book in row %}
                 <div class="card">
                     <img src="{{ book[2] }}">
-                    <h2>{{ book[0] }}</h2>
+                    <a href="/book_information/{{ book[3] }}">{{ book[0] }}</a>
                     <h3>{{ book[1] }}</h3>
                 </div>
             {% endfor %}

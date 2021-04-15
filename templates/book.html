@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+    <h1>{{ title }}</h1>
+    <table style="width: 100%">
+
+
+        {% if book %}
+        <tr>
+            <td style="width: 50%">
+                <img width="384" height="600" src="{{ img }}">
+            </td>
+            <td style="width: 50%" align="left" valign="top">
+                {% for key in book %}
+                <h3>{{ key }}</h3>
+                <h5>{{ book[key] }}</h5>
+                {% endfor %}
+                <h3>
+                    <a href="{{ link }}">Ссылка на ознакомление</a>
+                </h3>
+            </td>
+        </tr>
+        {% else %}
+        <h1>Книги с таким индификатором не существует</h1>
+        {% endif %}
+
+
+    </table>
+    <br>
+
+
+{% endblock %}
