@@ -2,12 +2,9 @@
 
 {% block content %}
 
-
+    {% if book %}
     <h1>{{ title }}</h1>
-    <table style="width: 100%">
-
-
-        {% if book %}
+    <table style="width: 100%"
         <tr>
             <td style="width: 50%">
                 <img width="384" height="600" src="{{ img }}">
@@ -22,12 +19,10 @@
                 </h3>
             </td>
         </tr>
-        {% else %}
-        <h1>Книги с таким индификатором не существует</h1>
-        {% endif %}
-
-
     </table>
+    {% else %}
+    <h1>Книги с таким индификатором не существует</h1>
+    {% endif %}
     <br>
 
 

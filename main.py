@@ -37,17 +37,7 @@ def index():
     return render_template('index.html', saying=choice(SAYINGS), title='Книгапоиск')
 
 
-@app.route('/search/<q>', methods=['GET', 'POST'])
-def search(q):
-    # q - книга, langRestrict - язык
-    params = {
-        "q": f'"{q}"',
-        "langRestrict": 'ru',
-        "maxResults": 40,
-        "key": 'AIzaSyDhh89odNoM6HWTlJQzfQ-_tbYHf-jncdQ'
-    }
-    response = requests.get(API_SERVER, params=params).json()
-    print(response)
+def get_books_table(response):
     # Собираю данные из запроса и формурую таблицу с 3 столбцами
     # В ячейке - миниатюра, название книги и автор
     books = []
@@ -75,9 +65,22 @@ def search(q):
                     img = '/static/img/default_img_book.png'
                 row.append([info['title'], authors, img, book['id']])
             books.append(row)
+    return books
 
+
+@app.route('/search/<q>', methods=['GET', 'POST'])
+def search(q):
     if request.method == 'POST' and request.form['q']:
          return redirect(f"/search/{request.form['q']}")
+    # q - книга, langRestrict - язык
+    params = {
+        "q": f'"{q}"',
+        "langRestrict": 'ru',
+        "maxResults": 40,
+        "key": 'AIzaSyDhh89odNoM6HWTlJQzfQ-_tbYHf-jncdQ'
+    }
+    response = requests.get(API_SERVER, params=params).json()
+    books = get_books_table(response)
     return render_template('search.html', saying=choice(SAYINGS),
                            books=books, title='Поиск')
 
@@ -88,7 +91,6 @@ def book_information(google_book_id):
          return redirect(f"/search/{request.form['q']}")
     response = requests.get(API_SERVER + '/' + google_book_id,
                             params={"langRestrict": 'ru'}).json()
-    print(response)
     book = {}
     img = None
     link = None
