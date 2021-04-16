@@ -3,23 +3,25 @@
 {% block content %}
 
     {% if book %}
-    <h1>{{ title }}</h1>
-    <table style="width: 100%"
-        <tr>
-            <td style="width: 50%">
+        <div class="about_book">
+            <h1>{{ title }}</h1>
+
+            <div style="width: 50%; float: left">
                 <img width="384" height="600" src="{{ img }}">
-            </td>
-            <td style="width: 50%" align="left" valign="top">
+            </div>
+
+            <div style="width: 50%; float: left">
+                <button style="margin-bottom: 50px" class="like-button"></button>
                 {% for key in book %}
-                <h3>{{ key }}</h3>
-                <h5>{{ book[key] }}</h5>
-                {% endfor %}
-                <h3>
-                    <a href="{{ link }}">Ссылка на ознакомление</a>
-                </h3>
-            </td>
-        </tr>
-    </table>
+                        <h3>{{ key }}</h3>
+                        <h5>{{ book[key] }}</h5>
+                        {% endfor %}
+                        <h3>
+                            <a href="{{ link }}">Ссылка на ознакомление</a>
+                        </h3>
+            </div>
+
+        </div>
     {% else %}
     <h1>Книги с таким индификатором не существует</h1>
     {% endif %}

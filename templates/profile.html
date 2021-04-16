@@ -3,12 +3,10 @@
 {% block content %}
 
 
-    <h1>Профиль</h1>
-    <table style="width: 100%">
 
-
-        <tr>
-            <td style="width: 50%">
+    <div class="profile" style="width: 100%">
+        <h1>Профиль</h1>
+            <div style="width: 50%;float: left">
                 <img src="/static/img/profile_img/{{ current_user.id }}.png">
                 <div>
                     <form class="login_form" method="post" enctype="multipart/form-data" name="loadimg">
@@ -25,8 +23,8 @@
                 </div>
 
 
-            </td>
-            <td style="width: 50%" align="left" valign="top">
+            </div>
+            <div style="width: 50%; float: left" valign="top">
                 {% for key in headers %}
                 <h3>{{ headers[key] }}</h3>
                 {% if not user[key] %}
@@ -35,11 +33,10 @@
                 <h5>{{ user[key] }}</h5>
                 {% endif %}
                 {% endfor %}
-            </td>
-        </tr>
+            </div>
 
 
-    </table>
+    </div>
     <br>
 
     <!-- Добавить редактирование!!!! -->

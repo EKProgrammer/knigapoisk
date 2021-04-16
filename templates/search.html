@@ -26,7 +26,7 @@
 	<div style="z-index: 99999;background-color: #506cf0; max-height: 100px; overflow: hidden" class="nava" role='navigation'>
   <img style="width:16%;margin:0;margin-top:2%;margin-left:4%;" src="static/img/logo.png">
     <ul>
-        <li><a href="#">Главная</a></li>
+        <li><a href="/">Главная</a></li>
 
         {% if current_user.is_authenticated %}
             <!-- Авторизованный пользователь  -->
@@ -70,11 +70,13 @@
         {% for row in books %}
         <tr>
             {% for book in row %}
-                <div class="card">
-                    <img src="{{ book[2] }}">
-                    <a href="/book_information/{{ book[3] }}">{{ book[0] }}</a>
-                    <h3>{{ book[1] }}</h3>
-                </div>
+                <a href="/book_information/{{ book[3] }}">
+                    <div class="card">
+                        <img src="{{ book[2] }}">
+                        <h3>{{ book[0] }}</h3>
+                        <h4>{{ book[1] }}</h4>
+                    </div>
+                </a>
             {% endfor %}
         <tr>
         {% endfor %}
