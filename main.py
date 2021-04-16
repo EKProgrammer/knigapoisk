@@ -27,6 +27,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 API_SERVER = "https://www.googleapis.com/books/v1/volumes"
+search_history = []
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -101,8 +102,10 @@ def book_information(google_book_id):
         else:
             img = '/static/img/default_img_book.png'
         book['Название'] = data['title']
+        search_history.extend(data['title'])
         if 'authors' in data:
             book['Авторы'] = ', '.join(data['authors'])
+            search_history.extend(data['categories'])
         else:
             book['Авторы'] = 'Отсутствуют'
         if 'publishedDate' in data:
@@ -115,6 +118,7 @@ def book_information(google_book_id):
             book['Описание'] = 'Отсутствует'
         if 'categories' in data:
             book['Категории'] = ', '.join(data['categories'])
+            search_history.extend(data['categories'])
         else:
             book['Категории'] = 'Отсутствуют'
         link = data['previewLink']
