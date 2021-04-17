@@ -4,7 +4,7 @@ from flask_login import LoginManager, login_user, login_required
 from flask_login import logout_user, current_user
 
 import requests
-from requests import get, post
+from requests import get
 
 from random import choice
 from PIL import Image
@@ -105,7 +105,7 @@ def book_information(google_book_id):
         search_history.extend(data['title'])
         if 'authors' in data:
             book['Авторы'] = ', '.join(data['authors'])
-            search_history.extend(data['categories'])
+            search_history.extend(data['authors'])
         else:
             book['Авторы'] = 'Отсутствуют'
         if 'publishedDate' in data:
@@ -146,30 +146,49 @@ def profile():
                            title='Профиль', saying=choice(SAYINGS))
 
 
-# не работает
+def check_email(db_sess, email, id=None):
+    if id:
+        other = db_sess.query(User).filter(User.id != current_user.id)
+    else:
+        other = db_sess.query(User).all()
+    emails = [i.email for i in other]
+    print(emails)
+    if email in emails:
+        return True
+    return False
+
+
 @app.route('/profile/edit', methods=['GET', 'POST'])
 @login_required
 def edit_user():
-    user = get(f'http://localhost:5000/api/users/{current_user.id}').json()['users']
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.id == current_user.id).first()
     form = EditForm()
 
     if request.method == "GET":
-        form.surname.data = user['surname']
-        form.name.data = user['name']
-        form.email.data = user['email']
-        form.age.data = user['age']
-        form.about.data = user['about']
+        form.surname.data = user.surname
+        form.name.data = user.name
+        form.email.data = user.email
+        form.age.data = user.age
+        form.about.data = user.about
         form.submit.label.text = 'Редактировать'
 
     elif request.method == "POST":
 
         if form.validate_on_submit():
-            post(f'http://localhost:5000/api/users/{current_user.id}', json={
-                    'surname': form.surname.data,
-                    'name': form.name.data,
-                    'email': form.email.data,
-                    'age': form.age.data,
-                    'about': form.about.data})
+            if check_email(db_sess, form.email.data, id=current_user.id):
+                return render_template('register.html',
+                                       message="Пользователь с таким постовым адресом уже зарегистрирован",
+                                       registerform=form, title='Редактирование профиля',
+                                       saying=choice(SAYINGS))
+
+            user.surname = form.surname.data
+            user.name = form.name.data
+            user.email = form.email.data
+            user.age = form.age.data
+            user.about = form.about.data
+
+            db_sess.commit()
             return redirect('/profile')
 
     return render_template('register.html', title='Редактирование профиля',
@@ -211,6 +230,10 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
+        if check_email(db_sess, form.email.data):
+            return render_template('register.html', registerform=form,
+                                   message="Пользователь с таким почтовым адресом уже зарегистрирован",
+                                   title='Регистрация', saying=choice(SAYINGS))
         user = User()
         user.surname = form.surname.data
         user.name = form.name.data
