@@ -7,7 +7,6 @@ import requests
 from requests import get
 
 from random import choice
-from PIL import Image
 from shutil import copy
 
 
@@ -22,12 +21,13 @@ from data.users import User
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
 api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 API_SERVER = "https://www.googleapis.com/books/v1/volumes"
-search_history = []
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -83,7 +83,16 @@ def search(q):
     response = requests.get(API_SERVER, params=params).json()
     books = get_books_table(response)
     return render_template('search.html', saying=choice(SAYINGS),
-                           books=books, title='Поиск')
+                           books=books, search_flag=True, title='Поиск')
+
+
+@app.route('/user_recommendations', methods=['GET', 'POST'])
+@login_required
+def user_recommendations():
+    # пока заглушка
+    books = []
+    return render_template('search.html', saying=choice(SAYINGS),
+                           books=books, search_flag=False, title='Рекомендации')
 
 
 @app.route('/book_information/<google_book_id>', methods=['GET', 'POST'])
@@ -95,6 +104,7 @@ def book_information(google_book_id):
     book = {}
     img = None
     link = None
+    search_history = []
     if 'volumeInfo' in response:
         data = response['volumeInfo']
         if 'imageLinks' in data:
@@ -131,13 +141,7 @@ def book_information(google_book_id):
 @login_required
 def profile():
     if request.method == 'POST':
-        path = f'static/img/profile_img/{current_user.id}.png'
-        file = request.files['file'].read()
-        with open(path, 'wb') as f:
-            f.write(file)
-        img = Image.open(path)
-        resize_img = img.resize((500, 500))
-        resize_img.save(path)
+        request.files['file'].save(f'static/img/profile_img/{current_user.id}.png')
 
     headers = {'surname': 'Фамилия', 'name': 'Имя', 'email': 'Почта',
                'age': 'Возраст', 'about': 'О себе'}
@@ -146,13 +150,12 @@ def profile():
                            title='Профиль', saying=choice(SAYINGS))
 
 
-def check_email(db_sess, email, id=None):
-    if id:
-        other = db_sess.query(User).filter(User.id != current_user.id)
+def check_email(db_sess, email, user_id=None):
+    if user_id:
+        other = db_sess.query(User).filter(User.id != user_id)
     else:
         other = db_sess.query(User).all()
     emails = [i.email for i in other]
-    print(emails)
     if email in emails:
         return True
     return False
@@ -173,23 +176,22 @@ def edit_user():
         form.about.data = user.about
         form.submit.label.text = 'Редактировать'
 
-    elif request.method == "POST":
+    elif request.method == "POST" and form.validate_on_submit():
+        if check_email(db_sess, form.email.data, user_id=current_user.id):
+            form.submit.label.text = 'Редактировать'
+            return render_template('register.html',
+                                   message="Пользователь с таким почтовым адресом уже зарегистрирован",
+                                   registerform=form, title='Редактирование профиля',
+                                   saying=choice(SAYINGS))
 
-        if form.validate_on_submit():
-            if check_email(db_sess, form.email.data, id=current_user.id):
-                return render_template('register.html',
-                                       message="Пользователь с таким постовым адресом уже зарегистрирован",
-                                       registerform=form, title='Редактирование профиля',
-                                       saying=choice(SAYINGS))
+        user.surname = form.surname.data
+        user.name = form.name.data
+        user.email = form.email.data
+        user.age = form.age.data
+        user.about = form.about.data
 
-            user.surname = form.surname.data
-            user.name = form.name.data
-            user.email = form.email.data
-            user.age = form.age.data
-            user.about = form.about.data
-
-            db_sess.commit()
-            return redirect('/profile')
+        db_sess.commit()
+        return redirect('/profile')
 
     return render_template('register.html', title='Редактирование профиля',
                            registerform=form, saying=choice(SAYINGS))

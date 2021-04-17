@@ -12,7 +12,7 @@
             crossorigin="anonymous"></script>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="../static/css/main.css">
-        <title>KnigaPoisk</title>
+        <title>{{ title }}</title>
 
 
 </head>
@@ -28,8 +28,8 @@
 
         {% if current_user.is_authenticated %}
             <!-- Авторизованный пользователь  -->
+            <li><a href="/user_recommendations">Рекомендации</a></li>
             <li><a href="/profile">{{ current_user.name }} <!-- <p style="font-size: 12px;margin-top:0%">Новичек</p> !--></a></li>
-
                 <!--<button class="btn btn dropdown-toggle" type="button"
                         id="dropdownMenuButton1" data-bs-toggle="dropdown"
                         aria-expanded="false">

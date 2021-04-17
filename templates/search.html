@@ -30,8 +30,8 @@
 
         {% if current_user.is_authenticated %}
             <!-- Авторизованный пользователь  -->
+            <li><a href="/user_recommendations">Рекомендации</a></li>
             <li><a href="/profile">{{ current_user.name }} <!-- <p style="font-size: 12px;margin-top:0%">Новичек</p> !--></a></li>
-
                 <!--<button class="btn btn dropdown-toggle" type="button"
                         id="dropdownMenuButton1" data-bs-toggle="dropdown"
                         aria-expanded="false">
@@ -41,6 +41,7 @@
                     <li><a class="dropdown-item" href="/profile">Профиль</a></li>
                     <li><a class="dropdown-item" href="/logout">Выйти</a></li>
                 </ul>-->
+             <li><a href="/logout">Выйти</a></li>
         {% else %}
             <!-- Неавторизованный пользователь  -->
             <p>
@@ -50,8 +51,6 @@
         {% endif %}
 
 
-
-
     </ul>
 </div>
 
@@ -59,13 +58,15 @@
 </header>
 
 <div class="main">
+    {% if search_flag %}
         <form class="d-flex" method="post">
-                    <input name="q" class="form-control me-2" type="search"
-                           placeholder="Поиск книг" aria-label="Search" required>
-                    <button class="btn btn-outline-secondary" type="submit">Искать</button>
+            <input name="q" class="form-control me-2" type="search"
+                   placeholder="Поиск книг" aria-label="Search" required>
+            <button class="btn btn-outline-secondary" type="submit">Искать</button>
         </form>
-        <br><br>
-        {% if books %}
+    {% endif %}
+    <br><br>
+    {% if books %}
     <table>
         {% for row in books %}
         <tr>
@@ -81,6 +82,9 @@
         <tr>
         {% endfor %}
     </table>
+    {% elif not books and not search_flag %}
+    <h2>Пока нет рекомендаций для Вас.</h2>
+    <h2>Добавляйте понравившиеся книги в "Избранное", чтобы мы могли предложить Вам книги для ознакомления. </h2>
     {% else %}
     <h2>По Вашему запросу ничего не найдено.</h2>
     {% endif %}
