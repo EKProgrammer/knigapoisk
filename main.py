@@ -80,26 +80,25 @@ def search(q):
     # q - книга, langRestrict - язык
     params = {
         "q": f'"{q}"',
-        "langRestrict": 'ru',
         "maxResults": 40,
+        "langRestrict": 'ru',
         "key": 'AIzaSyDhh89odNoM6HWTlJQzfQ-_tbYHf-jncdQ'
     }
     response = requests.get(API_SERVER, params=params).json()
     books = get_books_table(response)
-    return render_template('search.html', saying=choice(SAYINGS),
-                           books=books, search_flag=True, title='Поиск')
+    return render_template('search.html', books=books, search_flag=True, title='Поиск')
 
 
-@app.route('/user_recommendations', methods=['GET', 'POST'])
+@app.route('/user_recommendations')
 @login_required
 def user_recommendations():
     # пока заглушка
     books = []
-    return render_template('search.html', saying=choice(SAYINGS),
-                           books=books, search_flag=False, title='Рекомендации')
+    return render_template('search.html', books=books, search_flag=False,
+                           title='Рекомендации')
 
 
-@app.route('/book_information/<google_book_id>', methods=['GET', 'POST'])
+@app.route('/book_information/<google_book_id>')
 def book_information(google_book_id):
     if request.method == 'POST' and request.form['q']:
          return redirect(f"/search/{request.form['q']}")
@@ -107,7 +106,7 @@ def book_information(google_book_id):
                             params={"langRestrict": 'ru'}).json()
     book = {}
     img = None
-    link = None
+    buylink = None
     search_history = []
     if 'volumeInfo' in response:
         data = response['volumeInfo']
@@ -127,7 +126,7 @@ def book_information(google_book_id):
         else:
             book['Дата публикации'] = 'Отсутствует'
         if 'description' in data:
-            book['Описание'] = data['description']
+            book['Описание'] = data['description'].replace('<br>', '').replace('<p>', '')
         else:
             book['Описание'] = 'Отсутствует'
         if 'categories' in data:
@@ -135,10 +134,16 @@ def book_information(google_book_id):
             search_history.extend(data['categories'])
         else:
             book['Категории'] = 'Отсутствуют'
-        link = data['previewLink']
-    return render_template('book.html', saying=choice(SAYINGS),
-                           book=book, img=img, link=link,
-                           title='Информация о книге')
+        if 'buyLink' in response['saleInfo']:
+            buylink = response["saleInfo"]["buyLink"]
+    return render_template('book.html', book=book, img=img, buylink=buylink,
+                           google_book_id=google_book_id, title='Информация о книге')
+
+
+@app.route('/view_book/<google_book_id>')
+def view_book(google_book_id):
+    return render_template('book_viewer.html', google_book_id=google_book_id,
+                           title='Просмотр книги')
 
 
 @app.route('/profile', methods=['GET', 'POST'])
@@ -150,8 +155,7 @@ def profile():
     headers = {'surname': 'Фамилия', 'name': 'Имя', 'email': 'Почта',
                'age': 'Возраст', 'about': 'О себе'}
     user = get(f'http://localhost:5000/api/users/{current_user.id}').json()['users']
-    return render_template('profile.html', user=user, headers=headers,
-                           title='Профиль', saying=choice(SAYINGS))
+    return render_template('profile.html', user=user, headers=headers, title='Профиль')
 
 
 def check_email(db_sess, email, user_id=None):
@@ -185,8 +189,7 @@ def edit_user():
             form.submit.label.text = 'Редактировать'
             return render_template('register.html',
                                    message="Пользователь с таким почтовым адресом уже зарегистрирован",
-                                   registerform=form, title='Редактирование профиля',
-                                   saying=choice(SAYINGS))
+                                   registerform=form, title='Редактирование профиля')
 
         user.surname = form.surname.data
         user.name = form.name.data
@@ -198,7 +201,7 @@ def edit_user():
         return redirect('/profile')
 
     return render_template('register.html', title='Редактирование профиля',
-                           registerform=form, saying=choice(SAYINGS))
+                           registerform=form)
 
 
 @login_manager.user_loader
@@ -225,10 +228,8 @@ def login():
             return redirect("/")
         return render_template('login.html',
                                message="Неправильный логин или пароль",
-                               loginform=form, title='Авторизация',
-                               saying=choice(SAYINGS))
-    return render_template('login.html', loginform=form,
-                           title='Авторизация', saying=choice(SAYINGS))
+                               loginform=form, title='Авторизация')
+    return render_template('login.html', loginform=form, title='Авторизация')
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -239,7 +240,7 @@ def register():
         if check_email(db_sess, form.email.data):
             return render_template('register.html', registerform=form,
                                    message="Пользователь с таким почтовым адресом уже зарегистрирован",
-                                   title='Регистрация', saying=choice(SAYINGS))
+                                   title='Регистрация')
         user = User()
         user.surname = form.surname.data
         user.name = form.name.data
@@ -255,7 +256,7 @@ def register():
         copy(default_path, f'static/img/profile_img/{current_user.id}.png')
         return redirect("/")
     return render_template('register.html', registerform=form,
-                           title='Регистрация', saying=choice(SAYINGS))
+                           title='Регистрация')
 
 
 def main():
