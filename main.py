@@ -1,27 +1,24 @@
-# блок flask
 from flask import Flask, render_template, redirect, request
 from flask_restful import Api
 from flask_login import LoginManager, login_user, login_required
 from flask_login import logout_user, current_user
 
-# другие библиотеки
+import requests
 from requests import get
+
 from random import choice
 from shutil import copy
 
+
 # поговорки
 from data.sayings import SAYINGS
-# ресурсы
+
 from data import db_session, users_resource, books_resource
-# формы
 from forms.registerform import RegisterForm
 from forms.loginform import LoginForm
 from forms.editform import EditForm
-# таблицы
 from data.users import User
 
-
-# настройка приложения
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -29,7 +26,6 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
-
 
 API_SERVER = "https://www.googleapis.com/books/v1/volumes"
 APIKEY = 'AIzaSyDhh89odNoM6HWTlJQzfQ-_tbYHf-jncdQ'
@@ -40,7 +36,8 @@ APIKEY = 'AIzaSyDhh89odNoM6HWTlJQzfQ-_tbYHf-jncdQ'
 def index():
     if request.method == 'POST':
         return redirect(f"/search/{request.form['q']}")
-    return render_template('index.html', saying=choice(SAYINGS), title='Книгапоиск')
+    return render_template('index.html', saying=choice(SAYINGS),
+                           title='Книгапоиск')
 
 
 def get_books_table(response):
@@ -78,27 +75,23 @@ def get_books_table(response):
 
 @app.route('/search/<q>', methods=['GET', 'POST'])
 def search(q):
-    # поиск книг
     if request.method == 'POST' and request.form['q']:
+        z = f"{request.form['q']}"
         if request.form['author']:
-            return redirect(
-                f"/search/{request.form['q']}+inauthor:{request.form['author']}")
-        else:
-            return redirect(f"/search/{request.form['q']}")
-    # q - запрос, maxResults - максимальное кол-во результатов,
-    # langRestrict - язык, key - API ключ
+            z += f"+inauthor:{request.form['author']}"
+        if request.form['subject']:
+            z += f"+subject:{request.form['subject']}"
+        return redirect(f"/search/{z}")
+    # q - книга, langRestrict - язык
     params = {
         "q": f'"{q}"',
-        "maxResults": 40,
+        "maxResults": 20,
         "langRestrict": 'ru',
-        "key": APIKEY
+        "key": 'AIzaSyDhh89odNoM6HWTlJQzfQ-_tbYHf-jncdQ'
     }
-    # Получаем ответ API
-    response = get(API_SERVER, params=params).json()
-    # Формируем таблицу книг
+    response = requests.get(API_SERVER, params=params).json()
     books = get_books_table(response)
     return render_template('search.html', books=books, search_flag=True, title='Поиск')
-
 
 @app.route('/user_recommendations')
 @login_required
@@ -143,7 +136,8 @@ def book_information(google_book_id):
         # описание
         if 'description' in data:
             book['Описание'] = data['description'].replace(
-                '<br>', '').replace('<p>', '').replace('</br>', '').replace('</p>', '')
+                '<br>', '').replace('<p>', '').replace('</br>', '').replace(
+                '</p>', '')
         else:
             book['Описание'] = 'Отсутствует'
         # категории
@@ -175,14 +169,17 @@ def profile():
     # профиль пользователя
     if request.method == 'POST':
         # Загрузка аватара
-        request.files['file'].save(f'static/img/profile_img/{current_user.id}.png')
+        request.files['file'].save(
+            f'static/img/profile_img/{current_user.id}.png')
 
     # headers нужен для правильного порядка следования заголовков
     headers = {'surname': 'Фамилия', 'name': 'Имя', 'email': 'Почта',
                'age': 'Возраст', 'about': 'О себе'}
     # получаем двнные о пользователе
-    user = get(f'http://localhost:5000/api/users/{current_user.id}').json()['users']
-    return render_template('profile.html', user=user, headers=headers, title='Профиль')
+    user = get(f'http://localhost:5000/api/users/{current_user.id}').json()[
+        'users']
+    return render_template('profile.html', user=user, headers=headers,
+                           title='Профиль')
 
 
 def check_email(db_sess, email, user_id=None):
@@ -225,7 +222,8 @@ def edit_user():
             form.submit.label.text = 'Редактировать'
             return render_template('register.html',
                                    message="Пользователь с таким почтовым адресом уже зарегистрирован",
-                                   registerform=form, title='Редактирование профиля')
+                                   registerform=form,
+                                   title='Редактирование профиля')
 
         # иначе записываем новые данные
         user.surname = form.surname.data
@@ -306,6 +304,10 @@ def register():
     return render_template('register.html', registerform=form,
                            title='Регистрация')
 
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404_Not_Found.html'), 404
 
 def main():
     # иницилизация базы данных

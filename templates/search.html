@@ -11,8 +11,6 @@
             integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
             crossorigin="anonymous"></script>
     <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="static/css/main.css">
-    <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="../static/css/main.css">
     <title>KnigaPoisk</title>
 
@@ -59,12 +57,81 @@
 
 <div class="main">
     {% if search_flag %}
-        <form class="d-flex" method="post">
-                    <input name="q" class="form-control me-2" type="search"
-                           placeholder="Поиск книг" aria-label="Search" required>
+        <a href="/category_search">Поиск по категориям</a>
+        <form class="form_search" method="post">
+                <div class="col-3">
+                    <input class="effect-8" name="q" type="text" placeholder="Поиск книг"  aria-label="Search" required>
+                      <span class="focus-border"></span>
+                  </div>
 
-                    <input name="author" class="form-control me-2" type="search"
-                                   placeholder="Автор" aria-label="Search">
+                    <!--<input name="q" class="form-control me-2" type="search"
+                           placeholder="Поиск книг" aria-label="Search" required>-->
+
+                    <a class="content_toggle" href="#">Фильтры</a>
+
+                    <div class="content_block" style="display: none; height: 150px">
+
+                        <div style="width: 27.33%" class="col-3">
+                        <input class="effect-8" name="author"
+                                   placeholder="Автор"  type="text"  aria-label="Search">
+                          <span class="focus-border"></span>
+                      </div>
+
+                        <div class="container">
+                            <span class="choose">Категории</span>
+
+                              <div class="dropdown">
+                                <div class="select">
+                                  <i class="fa fa-chevron-left"></i>
+                                </div>
+                                <input name="subject" type="hidden" name="gender">
+                                <ul class="dropdown-menu">
+                                    <li id="ARCHITECTURE">АРХИТЕКТУРА</li>
+                                    <li id="ART">ИЗОБРАЗИТЕЛЬНОЕ ИСКУССТВО</li>
+                                    <li id="BIBLES">БИБЛИИ</li>
+                                    <li id="BIOGRAPHY">БИОГРАФИЯ</li>
+                                    <li id="BUSINESS">БИЗНЕС</li>
+                                    <li id="COMICS">КОМИКС</li>
+                                    <li id="COMPUTERS">КОМПЬЮТЕРЫ</li>
+                                    <li id="COOKING">кулинария</li>
+                                    <li id="HOBBIES">ХОББИ</li>
+                                    <li id="DESIGN">ДИЗАЙН</li>
+                                    <li id="DRAMA">ДРАМА</li>
+                                    <li id="GAME">ИГРЫ</li>
+                                    <li id="FITNESS">ФИТНЕС</li>
+                                    <li id="HISTORY">ИСТОРИЯ</li>
+
+                                    <li id="HUMOR">ЮМОР</li>
+                                    <li id="FICTION">ФАНТАСТИКА</li>
+
+                                    <li id="LAW">ЗАКОН</li>
+                                    <li id="LITERARY COLLECTIONS">ЛИТЕРАТУРНЫЕ КОЛЛЕКЦИИ</li>
+                                    <li id="MATHEMATICS">МАТЕМАТИКА</li>
+
+                                    <li id="MEDICAL">МЕДИЦИНА</li>
+                                    <li id="MUSIC">МУЗЫКА</li>
+                                    <li id="PETS">ДОМАШНИЕ ПИТОМЦЫ</li>
+
+                                    <li id="PHILOSOPHY">ФИЛОСОФИЯ</li>
+                                    <li id="PHOTOGRAPHY">ФОТОГРАФИЯ</li>
+                                    <li id="POETRY">ПОЭЗИЯ</li>
+
+                                    <li id="RELIGION">РЕЛИГИЯ</li>
+                                    <li id="SCIENCE">НАУКА</li>
+                                    <li id="SPORTS">СПОРТ</li>
+
+                                    <li id="TECHNOLOGY">ТЕХНОЛОГИИ</li>
+                                    <li id="TRANSPORTATION">ТРАНСПОРТ</li>
+                                    <li id="TRAVEL">ПУТЕШЕСТВИЯ</li>
+                                </ul>
+                              </div>
+
+                        </div>
+
+
+                    </div>
+
+
 
                     <button class="btn btn-outline-secondary" type="submit">Искать</button>
         </form>
@@ -88,8 +155,7 @@
     </table>
     {% elif not books and not search_flag %}
     <h2>Пока нет рекомендаций для Вас.</h2>
-    <h2>Добавляйте понравившиеся книги в "Избранное"(&#9829;),</h2>
-    <h2>чтобы мы могли предложить Вам книги для ознакомления. </h2>
+    <h2>Добавляйте понравившиеся книги в "Избранное", чтобы мы могли предложить Вам книги для ознакомления. </h2>
     {% else %}
     <h2>По Вашему запросу ничего не найдено.</h2>
     {% endif %}
@@ -97,8 +163,9 @@
 
 </div>
 
+<script src='https://code.jquery.com/jquery-2.2.4.min.js'></script><script  src="../static/js/script.js"></script>
+<script src="../static/js/main.js"></script>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
 
 </body>
 </html>
