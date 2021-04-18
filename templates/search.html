@@ -60,9 +60,13 @@
 <div class="main">
     {% if search_flag %}
         <form class="d-flex" method="post">
-            <input name="q" class="form-control me-2" type="search"
-                   placeholder="Поиск книг" aria-label="Search" required>
-            <button class="btn btn-outline-secondary" type="submit">Искать</button>
+                    <input name="q" class="form-control me-2" type="search"
+                           placeholder="Поиск книг" aria-label="Search" required>
+
+                    <input name="author" class="form-control me-2" type="search"
+                                   placeholder="Автор" aria-label="Search">
+
+                    <button class="btn btn-outline-secondary" type="submit">Искать</button>
         </form>
     {% endif %}
     <br><br>

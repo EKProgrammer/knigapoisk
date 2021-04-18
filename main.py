@@ -72,7 +72,11 @@ def get_books_table(response):
 @app.route('/search/<q>', methods=['GET', 'POST'])
 def search(q):
     if request.method == 'POST' and request.form['q']:
-         return redirect(f"/search/{request.form['q']}")
+        if request.form['author']:
+            return redirect(
+                f"/search/{request.form['q']}+inauthor:{request.form['author']}")
+        else:
+            return redirect(f"/search/{request.form['q']}")
     # q - книга, langRestrict - язык
     params = {
         "q": f'"{q}"',
