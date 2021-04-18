@@ -7,6 +7,7 @@ from data.reqparse_books import parser
 
 
 def abort_if_news_not_found(books_id):
+    # обработка ошибки
     session = db_session.create_session()
     books = session.query(Books).get(books_id)
     if not books:
@@ -14,7 +15,9 @@ def abort_if_news_not_found(books_id):
 
 
 class BooksResource(Resource):
+    # ресурс для одной книги
     def get(self, books_id):
+        # получение данных о книге
         abort_if_news_not_found(books_id)
         session = db_session.create_session()
         books = session.query(Books).get(books_id)
@@ -23,6 +26,7 @@ class BooksResource(Resource):
                   'year_of_publishing', 'description', 'preview_url'))})
 
     def delete(self, books_id):
+        # удаление данных о книге
         abort_if_news_not_found(books_id)
         session = db_session.create_session()
         books = session.query(Books).get(books_id)
@@ -32,7 +36,9 @@ class BooksResource(Resource):
 
 
 class BooksListResource(Resource):
+    # ресурс для списка книг
     def get(self):
+        # получение данных о книгах
         session = db_session.create_session()
         books = session.query(Books).all()
         return jsonify({'books': [item.to_dict(
@@ -41,6 +47,7 @@ class BooksListResource(Resource):
             for item in books]})
 
     def post(self):
+        # Добавление данных о новой книге
         args = parser.parse_args()
         session = db_session.create_session()
         books = Books(

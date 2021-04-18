@@ -7,6 +7,7 @@ from .db_session import SqlAlchemyBase
 
 
 class Books(SqlAlchemyBase, UserMixin, SerializerMixin):
+    # таблица книг
     __tablename__ = 'books'
 
     id = sqlalchemy.Column(sqlalchemy.Integer,

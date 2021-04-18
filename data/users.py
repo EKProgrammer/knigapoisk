@@ -8,6 +8,7 @@ from .db_session import SqlAlchemyBase
 
 
 class User(SqlAlchemyBase, UserMixin, SerializerMixin):
+    # таблица пользователя
     __tablename__ = 'users'
 
     id = sqlalchemy.Column(sqlalchemy.Integer,
@@ -23,7 +24,9 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     books = orm.relation("Books", back_populates='user')
 
     def set_password(self, password):
+        # генерация хеша для пароля
         self.hashed_password = generate_password_hash(password)
 
     def check_password(self, password):
+        # проверка пароля
         return check_password_hash(self.hashed_password, password)

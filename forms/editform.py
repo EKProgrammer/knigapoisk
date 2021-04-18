@@ -5,6 +5,7 @@ from wtforms.validators import DataRequired
 
 
 class EditForm(FlaskForm):
+    # форма редактирования (без поля пароля)
     surname = StringField('Фамилия', validators=[DataRequired()])
     name = StringField('Имя', validators=[DataRequired()])
     email = EmailField('Почта', validators=[DataRequired()])

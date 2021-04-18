@@ -9,6 +9,7 @@ __factory = None
 
 
 def global_init(db_file):
+    # иницилизация базы данных
     global __factory
 
     if __factory:
