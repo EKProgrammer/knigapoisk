@@ -11,7 +11,13 @@
             </div>
 
             <div style="width: 50%; float: left">
-                <button style="margin-bottom: 50px" class="like-button"></button>
+            <!-- аргумент как часть пути -->
+                <form action="/background_process_test/" method="POST">
+                    <!-- скрытый параметр -->
+                    <input type="hidden" name="google_book_id" value="{{ google_book_id }}">
+                    <input type="submit" class="like-button" value="Нажать 2">
+                </form>
+                <!--<button  style="margin-bottom: 50px" class="like-button"></button>-->
                 {% for key in book %}
                     <h3>{{ key }}</h3>
                     <h5>{{ book[key] }}</h5>
@@ -29,6 +35,7 @@
     <h1>Книги с таким индификатором не существует</h1>
     {% endif %}
     <br>
+
 
 
 {% endblock %}

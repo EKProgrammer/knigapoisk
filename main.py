@@ -18,6 +18,7 @@ from forms.registerform import RegisterForm
 from forms.loginform import LoginForm
 from forms.editform import EditForm
 from data.users import User
+from data.favorite import Favorite
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -162,6 +163,34 @@ def view_book(google_book_id):
     return render_template('book_viewer.html', google_book_id=google_book_id,
                            title='Просмотр книги')
 
+
+#запись в избранное
+@app.route('/background_process_test/', methods=['POST'])
+def background_process_test():
+    db_sess = db_session.create_session()
+    check = []
+    google_book_id  = request.form['google_book_id']
+    #print(current_user.id)
+
+    for favorite_ in db_sess.query(Favorite).all():
+        f = str(favorite_)
+        f = f.split()
+        if int(f[1]) == int(current_user.id):
+            check.append(f[2])
+
+
+    if google_book_id in check:
+        return redirect(f"/error")
+    else:
+        fav = Favorite()
+
+        fav.user_id = current_user.id
+        fav.google_id = google_book_id
+
+        db_sess.add(fav)
+        db_sess.commit()
+
+        return redirect(f"/book_information/{google_book_id}")
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -326,3 +355,16 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+#db_sess = db_session.create_session() Создаю ссесию
+#    check = [] список  подходящими ключами
+#
+#    for favorite_ in db_sess.query(Favorite).all(): перебираю всю таблицу
+#        f = str(favorite_)
+#        f = f.split()
+#        if int(f[1]) == int(current_user.id): если нахожу совпадение с id пользователя
+#            check.append(f[2]) то добавляю в список
+#  f[0] - id избранного
+#  f[1] - id пользователя
+#  f[2] - id google book
