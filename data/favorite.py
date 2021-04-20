@@ -11,8 +11,10 @@ class Favorite(SqlAlchemyBase, SerializerMixin):
 
     fav_id = sqlalchemy.Column(sqlalchemy.Integer,
                            primary_key=True, autoincrement=True)
-    user_id = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
+    user_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"))
     google_id = sqlalchemy.Column(sqlalchemy.String, unique=True, nullable=True)
+
+    user = orm.relation('User')
 
     def __repr__(self):
         return f'{self.fav_id} {self.user_id} {self.google_id}'

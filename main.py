@@ -4,7 +4,6 @@ from flask_login import LoginManager, login_user, login_required
 from flask_login import logout_user, current_user
 
 import requests
-from requests import get
 
 from random import choice
 from shutil import copy
@@ -12,14 +11,18 @@ from shutil import copy
 
 # поговорки
 from data.sayings import SAYINGS
-
-from data import db_session, users_resource, books_resource
+# ресурс
+from data import db_session, users_resource
+# формы
 from forms.registerform import RegisterForm
 from forms.loginform import LoginForm
 from forms.editform import EditForm
+# таблицы
 from data.users import User
 from data.favorite import Favorite
 
+
+# настройка приложения
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -28,15 +31,20 @@ api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+# константы
 API_SERVER = "https://www.googleapis.com/books/v1/volumes"
 APIKEY = 'AIzaSyDhh89odNoM6HWTlJQzfQ-_tbYHf-jncdQ'
+
+tags = {'subject': [],
+        'inauthor': [],
+        'intitle': []}
 
 
 # главная страница
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        return redirect(f"/search/{request.form['q']}")
+        return redirect(f"/search/{request.form['q'].replace(' ', '+')}")
     return render_template('index.html', saying=choice(SAYINGS),
                            title='Книгапоиск')
 
@@ -57,58 +65,83 @@ def get_books_table(response):
                 # делаем срез оставшихся двух книг или одной книги
                 slice = response['items'][row_index * 3:]
             for book in slice:
-                info = book['volumeInfo']
-                # Проверка на существование автора
-                if 'authors' in info:
-                    # Авторов может быть несколько
-                    authors = ', '.join(info['authors'])
-                else:
-                    authors = 'Автор не известен'
-                # Проверка на существование картинки
-                if 'imageLinks' in info:
-                    img = info['imageLinks']['thumbnail']
-                else:
-                    img = '/static/img/default_img_book.png'
-                row.append([info['title'], authors, img, book['id']])
+                row.append(book_parse(book))
             books.append(row)
     return books
 
 
+def book_parse(book):
+    # получаем информацию о книге в нужном для нас формате
+    info = book['volumeInfo']
+    if 'authors' in info:
+        # Авторов может быть несколько
+        authors = ', '.join(info['authors'])
+    else:
+        authors = 'Автор не известен'
+    # Проверка на существование картинки
+    if 'imageLinks' in info:
+        img = info['imageLinks']['thumbnail']
+    else:
+        img = '/static/img/default_img_book.png'
+    return [info['title'], authors, img, book['id']]
+
+
 @app.route('/search/<q>', methods=['GET', 'POST'])
 def search(q):
+    # поиск книг
+
     if request.method == 'POST' and request.form['q']:
-        z = f"{request.form['q']}"
+        z = f"{request.form['q'].strip()}"
         if request.form['author']:
-            z += f"+inauthor:{request.form['author']}"
+            z += f'+inauthor:"{request.form["author"].replace(" ", "+")}"'
         if request.form['subject']:
-            z += f"+subject:{request.form['subject']}"
-        return redirect(f"/search/{z}")
-    # q - книга, langRestrict - язык
+            z += f'+subject:"{request.form["subject"].replace(" ", "+")}"'
+        return redirect(f"/search/{z.replace(' ', '+')}")
+
+    # q - запрос, maxResults - максимальное кол-во результатов,
+    # langRestrict - язык, key - API ключ
     params = {
         "q": f'"{q}"',
         "maxResults": 20,
         "langRestrict": 'ru',
-        "key": 'AIzaSyDhh89odNoM6HWTlJQzfQ-_tbYHf-jncdQ'
+        "key": APIKEY
     }
+    # Получаем ответ API
     response = requests.get(API_SERVER, params=params).json()
+    # Формируем таблицу книг
     books = get_books_table(response)
-    return render_template('search.html', books=books, search_flag=True, title='Поиск')
+    return render_template('search.html', books=books,
+                           search_flag=True, title='Поиск')
+
 
 @app.route('/user_recommendations')
 @login_required
 def user_recommendations():
     # Формируем рекомендации для пользователя
-    # пока заглушка
-    books = []
-    return render_template('search.html', books=books, search_flag=False,
-                           title='Рекомендации')
+    get_tags()
+
+    books = {'totalItems': 1, 'items': []}
+    for param in tags.keys():
+        for tag in tags[param]:
+            params = {
+                "q": f'""+{param}:"{tag.replace(" ", "+")}"',
+                "maxResults": 10,
+                "langRestrict": 'ru',
+                "key": APIKEY
+            }
+            # Получаем ответ API
+            response = requests.get(API_SERVER, params=params).json()
+            books['items'].extend(response['items'])
+    table = get_books_table(books)
+    return render_template('search.html', books=table,
+                           search_flag=False, title='Рекомендации')
 
 
 @app.route('/book_information/<google_book_id>')
 def book_information(google_book_id):
     # Выводим информацию о книге
-    response = get(API_SERVER + '/' + google_book_id,
-                   params={"langRestrict": 'ru', "key": APIKEY}).json()
+    response = requests.get(API_SERVER + '/' + google_book_id,
+                            params={"langRestrict": 'ru', "key": APIKEY}).json()
 
     book = {}
     img = None
@@ -164,20 +197,19 @@ def view_book(google_book_id):
                            title='Просмотр книги')
 
 
-#запись в избранное
+# запись в избранное
 @app.route('/background_process_test/', methods=['POST'])
 def background_process_test():
     db_sess = db_session.create_session()
     check = []
-    google_book_id  = request.form['google_book_id']
-    #print(current_user.id)
+    google_book_id = request.form['google_book_id']
+    # print(current_user.id)
 
     for favorite_ in db_sess.query(Favorite).all():
         f = str(favorite_)
         f = f.split()
         if int(f[1]) == int(current_user.id):
             check.append(f[2])
-
 
     if google_book_id in check:
         return redirect(f"/error")
@@ -190,7 +222,32 @@ def background_process_test():
         db_sess.add(fav)
         db_sess.commit()
 
+        get_tags()
+
         return redirect(f"/book_information/{google_book_id}")
+
+
+def get_tags():
+    db_sess = db_session.create_session()
+    favorites = db_sess.query(User).filter(
+        User.id == current_user.id).first().books
+
+    for key in tags.keys():
+        tags[key] = []
+
+    for favorite in favorites[-2:]:
+        response = requests.get(
+            API_SERVER + '/' + favorite.google_id,
+            params={"langRestrict": 'ru', "key": APIKEY}).json()
+        if 'categories' in response['volumeInfo']:
+            tags['subject'].append(response['volumeInfo']['categories'][0])
+        elif 'authors' in response['volumeInfo']:
+            tags['inauthor'].append(response['volumeInfo']['authors'][0])
+        else:
+            tags['intitle'].append(response['volumeInfo']['title'])
+    for key in tags.keys():
+        tags[key] = list(set(tags[key]))
+
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -205,7 +262,7 @@ def profile():
     headers = {'surname': 'Фамилия', 'name': 'Имя', 'email': 'Почта',
                'age': 'Возраст', 'about': 'О себе'}
     # получаем двнные о пользователе
-    user = get(f'http://localhost:5000/api/users/{current_user.id}').json()[
+    user = requests.get(f'http://localhost:5000/api/users/{current_user.id}').json()[
         'users']
     return render_template('profile.html', user=user, headers=headers,
                            title='Профиль')
@@ -338,17 +395,15 @@ def register():
 def page_not_found(e):
     return render_template('404_Not_Found.html'), 404
 
+
 def main():
     # иницилизация базы данных
     db_session.global_init("db/knigapoisk_db.db")
 
     # для списка объектов
     api.add_resource(users_resource.UsersListResource, '/api/users')
-    api.add_resource(books_resource.BooksListResource, '/api/books')
-
     # для одного объекта
     api.add_resource(users_resource.UsersResource, '/api/users/<int:users_id>')
-    api.add_resource(books_resource.BooksResource, '/api/books/<int:books_id>')
 
     app.run()
 

@@ -135,29 +135,30 @@
 
                     <button class="btn btn-outline-secondary" type="submit">Искать</button>
         </form>
+        <br><br>
     {% endif %}
-    <br><br>
+
     {% if books %}
-    <table>
-        {% for row in books %}
-        <tr>
-            {% for book in row %}
-                <a href="/book_information/{{ book[3] }}">
-                    <div class="card">
-                        <img src="{{ book[2] }}">
-                        <h3>{{ book[0] }}</h3>
-                        <h4>{{ book[1] }}</h4>
-                    </div>
-                </a>
+        <table>
+            {% for row in books %}
+            <tr>
+                {% for book in row %}
+                    <a href="/book_information/{{ book[3] }}">
+                        <div class="card">
+                            <img src="{{ book[2] }}">
+                            <h3>{{ book[0] }}</h3>
+                            <h4>{{ book[1] }}</h4>
+                        </div>
+                    </a>
+                {% endfor %}
+            <tr>
             {% endfor %}
-        <tr>
-        {% endfor %}
-    </table>
+        </table>
     {% elif not books and not search_flag %}
-    <h2>Пока нет рекомендаций для Вас.</h2>
-    <h2>Добавляйте понравившиеся книги в "Избранное", чтобы мы могли предложить Вам книги для ознакомления. </h2>
+        <h2>Пока нет рекомендаций для Вас.</h2>
+        <h2>Добавляйте понравившиеся книги в "Избранное", чтобы мы могли предложить Вам книги для ознакомления. </h2>
     {% else %}
-    <h2>По Вашему запросу ничего не найдено.</h2>
+        <h2>По Вашему запросу ничего не найдено.</h2>
     {% endif %}
 
 

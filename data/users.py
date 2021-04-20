@@ -19,9 +19,8 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     age = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     about = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    recommendations = sqlalchemy.Column(sqlalchemy.String, nullable=True)
 
-    books = orm.relation("Books", back_populates='user')
+    books = orm.relation("Favorite", back_populates='user')
 
     def set_password(self, password):
         # генерация хеша для пароля
