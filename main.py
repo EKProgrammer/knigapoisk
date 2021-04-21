@@ -5,7 +5,7 @@ from flask_login import logout_user, current_user
 
 import requests
 
-from random import choice
+from random import choice, sample
 from shutil import copy
 
 
@@ -34,10 +34,6 @@ login_manager.init_app(app)
 # константы
 API_SERVER = "https://www.googleapis.com/books/v1/volumes"
 APIKEY = 'AIzaSyDhh89odNoM6HWTlJQzfQ-_tbYHf-jncdQ'
-
-tags = {'subject': [],
-        'inauthor': [],
-        'intitle': []}
 
 
 # главная страница
@@ -118,11 +114,12 @@ def search(q):
 @login_required
 def user_recommendations():
     # Формируем рекомендации для пользователя
-    get_tags()
-
+    tags = get_tags()
+    # ключи для того, чтобы не получить ошибку в get_books_table()
     books = {'totalItems': 1, 'items': []}
     for param in tags.keys():
         for tag in tags[param]:
+            # Формируем запрос по соответствующему параметру
             params = {
                 "q": f'""+{param}:"{tag.replace(" ", "+")}"',
                 "maxResults": 10,
@@ -131,10 +128,39 @@ def user_recommendations():
             }
             # Получаем ответ API
             response = requests.get(API_SERVER, params=params).json()
+            # Добавляем новые книги
             books['items'].extend(response['items'])
+    # Формируем таблицу из 3-х столбцов
     table = get_books_table(books)
     return render_template('search.html', books=table,
                            search_flag=False, title='Рекомендации')
+
+
+def get_tags():
+    # Получаем теги для формирования рекомендаций
+    db_sess = db_session.create_session()
+    # Все избранные ползователем книги
+    favorites = db_sess.query(User).filter(
+        User.id == current_user.id).first().books
+
+    tags = {'subject': [],
+            'inauthor': [],
+            'intitle': []}
+    # Используем две любые книги
+    for favorite in sample(favorites, 2):
+        response = requests.get(
+            API_SERVER + '/' + favorite.google_id,
+            params={"langRestrict": 'ru', "key": APIKEY}).json()
+        # Полчаем тег книги либо из категорий (в первую очередь),
+        # либо из авторов, либо, крайнем случае, из названия.
+        if 'categories' in response['volumeInfo']:
+            tags['subject'].append(response['volumeInfo']['categories'][0])
+        elif 'authors' in response['volumeInfo']:
+            tags['inauthor'].append(response['volumeInfo']['authors'][0])
+        else:
+            tags['intitle'].append(response['volumeInfo']['title'])
+
+    return tags
 
 
 @app.route('/book_information/<google_book_id>')
@@ -222,31 +248,7 @@ def background_process_test():
         db_sess.add(fav)
         db_sess.commit()
 
-        get_tags()
-
         return redirect(f"/book_information/{google_book_id}")
-
-
-def get_tags():
-    db_sess = db_session.create_session()
-    favorites = db_sess.query(User).filter(
-        User.id == current_user.id).first().books
-
-    for key in tags.keys():
-        tags[key] = []
-
-    for favorite in favorites[-2:]:
-        response = requests.get(
-            API_SERVER + '/' + favorite.google_id,
-            params={"langRestrict": 'ru', "key": APIKEY}).json()
-        if 'categories' in response['volumeInfo']:
-            tags['subject'].append(response['volumeInfo']['categories'][0])
-        elif 'authors' in response['volumeInfo']:
-            tags['inauthor'].append(response['volumeInfo']['authors'][0])
-        else:
-            tags['intitle'].append(response['volumeInfo']['title'])
-    for key in tags.keys():
-        tags[key] = list(set(tags[key]))
 
 
 @app.route('/profile', methods=['GET', 'POST'])
@@ -323,6 +325,14 @@ def edit_user():
 
     return render_template('register.html', title='Редактирование профиля',
                            registerform=form)
+
+
+@app.route('/profile/delete')
+@login_required
+def delete_user():
+    # удаление пользователя
+    requests.delete(f'http://localhost:5000/api/users/{current_user.id}')
+    return redirect('/')
 
 
 @login_manager.user_loader

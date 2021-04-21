@@ -39,8 +39,8 @@
     <br>
 
     <a class="btn btn-outline-success" href="/profile/edit">Редактировать профиль</a>
-    <!-- Добавить удаление!!!! -->
-    <a class="btn btn-outline-danger" href="/profile/delete">Удалить профиль</a>
+    <a class="btn btn-outline-danger" href="/profile/delete"
+       onclick="return confirm('Вы уверены, что хотите удалить профиль? Отменить это действие будет невозможно.');">Удалить профиль</a>
 
 
 {% endblock %}
