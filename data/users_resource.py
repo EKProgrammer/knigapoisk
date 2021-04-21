@@ -3,6 +3,7 @@ from flask import jsonify
 
 from data import db_session
 from data.users import User
+from data.favorite import Favorite
 from data.reqparse_users import parser
 
 
@@ -29,6 +30,9 @@ class UsersResource(Resource):
         abort_if_news_not_found(users_id)
         session = db_session.create_session()
         users = session.query(User).get(users_id)
+        # удаление избранных
+        session.query(Favorite).filter(Favorite.user_id == users.id).delete()
+
         session.delete(users)
         session.commit()
         return jsonify({'success': 'OK'})
