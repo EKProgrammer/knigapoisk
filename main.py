@@ -115,23 +115,27 @@ def search(q):
 def user_recommendations():
     # Формируем рекомендации для пользователя
     tags = get_tags()
-    # ключи для того, чтобы не получить ошибку в get_books_table()
-    books = {'totalItems': 1, 'items': []}
-    for param in tags.keys():
-        for tag in tags[param]:
-            # Формируем запрос по соответствующему параметру
-            params = {
-                "q": f'""+{param}:"{tag.replace(" ", "+")}"',
-                "maxResults": 10,
-                "langRestrict": 'ru',
-                "key": APIKEY
-            }
-            # Получаем ответ API
-            response = requests.get(API_SERVER, params=params).json()
-            # Добавляем новые книги
-            books['items'].extend(response['items'])
-    # Формируем таблицу из 3-х столбцов
-    table = get_books_table(books)
+    # Если избранных книг нет значит и рекомендаций нет
+    if tags:
+        # ключи для того, чтобы не получить ошибку в get_books_table()
+        books = {'totalItems': 1, 'items': []}
+        for param in tags.keys():
+            for tag in tags[param]:
+                # Формируем запрос по соответствующему параметру
+                params = {
+                    "q": f'""+{param}:"{tag.replace(" ", "+")}"',
+                    "maxResults": 10,
+                    "langRestrict": 'ru',
+                    "key": APIKEY
+                }
+                # Получаем ответ API
+                response = requests.get(API_SERVER, params=params).json()
+                # Добавляем новые книги
+                books['items'].extend(response['items'])
+        # Формируем таблицу из 3-х столбцов
+        table = get_books_table(books)
+    else:
+        table = []
     return render_template('search.html', books=table,
                            search_flag=False, title='Рекомендации')
 
@@ -142,6 +146,9 @@ def get_tags():
     # Все избранные ползователем книги
     favorites = db_sess.query(User).filter(
         User.id == current_user.id).first().books
+    # Если избранных книг нет значит и рекомендаций нет
+    if not favorites:
+        return {}
 
     tags = {'subject': [],
             'inauthor': [],
