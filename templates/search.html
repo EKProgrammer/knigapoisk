@@ -29,16 +29,9 @@
         {% if current_user.is_authenticated %}
             <!-- Авторизованный пользователь  -->
             <li><a href="/user_recommendations">Рекомендации</a></li>
+            <li><a href="/favorites/{{ current_user.id }}">Избранное</a></li>
             <li><a href="/profile">{{ current_user.name }} <!-- <p style="font-size: 12px;margin-top:0%">Новичек</p> !--></a></li>
-                <!--<button class="btn btn dropdown-toggle" type="button"
-                        id="dropdownMenuButton1" data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                  <img src="/static/img/default_person_img.png">
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                    <li><a class="dropdown-item" href="/profile">Профиль</a></li>
-                    <li><a class="dropdown-item" href="/logout">Выйти</a></li>
-                </ul>-->
+
              <li><a href="/logout">Выйти</a></li>
         {% else %}
             <!-- Неавторизованный пользователь  -->

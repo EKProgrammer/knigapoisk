@@ -318,34 +318,7 @@ table {
   text-decoration: underline;
 }
 
-.like-button {
-  display: inline-block;
-  position: relative;
-  font-size: 32px;
-  cursor: pointer;
-}
-.like-button::before {
-  font-size: 3em;
-  color: #000;
-  content: "♥";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-}
-.like-button::after {
-  font-size: 3em;
-  color: #ff3252;
-  content: "♥";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  transition: transform 0.2s;
-}
-.like-button.liked::after {
-  transform: translate(-50%, -50%) scale(1.1);
-}
+
 
 
 .content_toggle {
@@ -379,11 +352,7 @@ span.choose {
   padding: 5px 0 10px;
   display: inherit
 }
-.container {
-  width: 500px;
-  margin: 50px auto 0;
-  text-align: center
-}
+
 
 /*Styling Selectbox*/
 .dropdown {

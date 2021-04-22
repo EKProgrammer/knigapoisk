@@ -8,7 +8,6 @@ import requests
 from random import choice, sample
 from shutil import copy
 
-
 # поговорки
 from data.sayings import SAYINGS
 # ресурс
@@ -20,7 +19,6 @@ from forms.editform import EditForm
 # таблицы
 from data.users import User
 from data.favorite import Favorite
-
 
 # настройка приложения
 app = Flask(__name__)
@@ -61,6 +59,7 @@ def get_books_table(response):
                 # делаем срез оставшихся двух книг или одной книги
                 slice = response['items'][row_index * 3:]
             for book in slice:
+                print(book)
                 row.append(book_parse(book))
             books.append(row)
     return books
@@ -176,6 +175,19 @@ def book_information(google_book_id):
     response = requests.get(API_SERVER + '/' + google_book_id,
                             params={"langRestrict": 'ru', "key": APIKEY}).json()
 
+    db_sess = db_session.create_session()
+    check = []
+    for favorite_ in db_sess.query(Favorite).all():
+        f = str(favorite_)
+        f = f.split()
+        if int(f[1]) == int(current_user.id):
+            check.append(f[2])
+
+    if google_book_id in check:
+        fav = True
+    else:
+        fav = False
+
     book = {}
     img = None
     buylink = None
@@ -220,7 +232,116 @@ def book_information(google_book_id):
             isreadable = True
     return render_template('book.html', book=book, img=img, buylink=buylink,
                            google_book_id=google_book_id, isreadable=isreadable,
-                           title='Информация о книге')
+                           fav_check=fav, title='Информация о книге')
+
+
+def book_parse2(book):
+    # получаем информацию о книге в нужном для нас формате
+    if 'Авторы' in book:
+        # Авторов может быть несколько
+        authors = ', '.join(book['Авторы'].split())
+    else:
+        authors = 'Автор не известен'
+    # Проверка на существование картинки
+    if 'image' in book:
+        img = book['image']
+
+    return [book['Название'], authors, img, book['id']]
+
+def get_books_table2(response):
+    # Собираю данные из запроса и формурую таблицу с 3 столбцами
+    # В ячейке - миниатюра, название книги и автор
+    books = []
+    # Если количество найденных книг будет рано 0,
+    # то books будет пустой, и будет выведено соответствующее сообщение пользователю
+    for row_index in range(len(response) // 3 + 1):
+        row = []
+        if (row_index + 1) * 3 <= len(response):
+            # делаем срез трёх книг
+            slice = response[row_index * 3:(row_index + 1) * 3]
+        else:
+            # делаем срез оставшихся двух книг или одной книги
+            slice = response[row_index * 3:]
+        for book in slice:
+            row.append(book)
+        books.append(row)
+    return books
+
+@app.route('/favorites/<user_id>')
+def favorites(user_id):
+    if int(current_user.id) == int(user_id):
+        # Выводим информацию о книге
+
+        db_sess = db_session.create_session()
+        favorite_list = []
+        check = []
+        for favorite_ in db_sess.query(Favorite).all():
+            f = str(favorite_)
+            f = f.split()
+            if int(f[1]) == int(current_user.id):
+                check.append(f[2])
+
+        for favorite in check:
+            response = requests.get(API_SERVER + '/' + favorite,
+                                    params={"langRestrict": 'ru',
+                                            "key": APIKEY}).json()
+            book = {}
+            img = None
+            buylink = None
+            isreadable = False
+            # Проверка на существование книги
+            if 'volumeInfo' in response:
+                data = response['volumeInfo']
+                # обложка
+                if 'imageLinks' in data:
+                    img = data['imageLinks']['thumbnail']
+                else:
+                    img = '/static/img/default_img_book.png'
+                book['image'] = img
+                book['id'] = favorite
+                # название
+                book['Название'] = data['title']
+                # авторы
+                if 'authors' in data:
+                    book['Авторы'] = ', '.join(data['authors'])
+                else:
+                    book['Авторы'] = 'Отсутствуют'
+                # дата публикации
+                if 'publishedDate' in data:
+                    book['Дата публикации'] = data['publishedDate']
+                else:
+                    book['Дата публикации'] = 'Отсутствует'
+                # описание
+                if 'description' in data:
+                    book['Описание'] = data['description'].replace(
+                        '<br>', '').replace('<p>', '').replace('</br>', '').replace(
+                        '</p>', '')
+                else:
+                    book['Описание'] = 'Отсутствует'
+                # категории
+                if 'categories' in data:
+                    book['Категории'] = ', '.join(data['categories'])
+                else:
+                    book['Категории'] = 'Отсутствуют'
+                # ссылка на покупку книги
+                if 'buyLink' in response['saleInfo']:
+                    buylink = response["saleInfo"]["buyLink"]
+                # флаг на публикацию ссылки на предварительное ознакомление с книгой
+                if data['readingModes']['text'] or data['readingModes']['image']:
+                    isreadable = True
+
+                pars_book = book_parse2(book)
+                favorite_list.append(pars_book)
+
+        table = get_books_table2(favorite_list)
+
+        return render_template('search.html', books = table,
+                            search_flag=False, title='Рекомендации')
+
+
+    else:
+        return redirect(f"/error")
+
 
 
 @app.route('/view_book/<google_book_id>')
@@ -236,26 +357,40 @@ def background_process_test():
     db_sess = db_session.create_session()
     check = []
     google_book_id = request.form['google_book_id']
+    flag = int(request.form['delete_flag'])
     # print(current_user.id)
 
-    for favorite_ in db_sess.query(Favorite).all():
-        f = str(favorite_)
-        f = f.split()
-        if int(f[1]) == int(current_user.id):
-            check.append(f[2])
+    if flag == 0:
+        for favorite_ in db_sess.query(Favorite).all():
+            f = str(favorite_)
+            f = f.split()
+            if int(f[1]) == int(current_user.id):
+                check.append(f[2])
 
-    if google_book_id in check:
-        return redirect(f"/error")
+        if google_book_id in check:
+            return redirect(f"/error")
+        else:
+            fav = Favorite()
+
+            fav.user_id = current_user.id
+            fav.google_id = google_book_id
+
+            db_sess.add(fav)
+            db_sess.commit()
+
+            return redirect(f"/book_information/{google_book_id}")
+
     else:
-        fav = Favorite()
-
-        fav.user_id = current_user.id
-        fav.google_id = google_book_id
-
-        db_sess.add(fav)
-        db_sess.commit()
+        fav = db_sess.query(Favorite).filter(Favorite.user_id == str(current_user.id),
+                                          Favorite.google_id == str(google_book_id)
+                                          ).first()
+        if fav:
+            db_sess.delete(fav)
+            db_sess.commit()
 
         return redirect(f"/book_information/{google_book_id}")
+
+
 
 
 @app.route('/profile', methods=['GET', 'POST'])
@@ -271,7 +406,8 @@ def profile():
     headers = {'surname': 'Фамилия', 'name': 'Имя', 'email': 'Почта',
                'age': 'Возраст', 'about': 'О себе'}
     # получаем двнные о пользователе
-    user = requests.get(f'http://localhost:5000/api/users/{current_user.id}').json()[
+    user = \
+    requests.get(f'http://localhost:5000/api/users/{current_user.id}').json()[
         'users']
     return render_template('profile.html', user=user, headers=headers,
                            title='Профиль')
@@ -428,8 +564,7 @@ def main():
 if __name__ == '__main__':
     main()
 
-
-#db_sess = db_session.create_session() Создаю ссесию
+# db_sess = db_session.create_session() Создаю ссесию
 #    check = [] список  подходящими ключами
 #
 #    for favorite_ in db_sess.query(Favorite).all(): перебираю всю таблицу

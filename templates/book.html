@@ -14,8 +14,17 @@
             <!-- аргумент как часть пути -->
                 <form action="/background_process_test/" method="POST">
                     <!-- скрытый параметр -->
-                    <input type="hidden" name="google_book_id" value="{{ google_book_id }}">
-                    <input type="submit" class="like-button" value="Нажать 2">
+                     {% if fav_check %}
+                         <input type="hidden" name="google_book_id" value="{{ google_book_id }}">
+                         <input type="hidden" name="delete_flag" value="1">
+                        <input type="submit" class="like-button" value="Удалить из избранного">
+
+                    {% else %}
+                         <input type="hidden" name="google_book_id" value="{{ google_book_id }}">
+                         <input type="hidden" name="delete_flag" value="0">
+                        <input type="submit" class="like-button" value="Добавить в избранное">
+                    {% endif %}
+
                 </form>
                 <!--<button  style="margin-bottom: 50px" class="like-button"></button>-->
                 {% for key in book %}
