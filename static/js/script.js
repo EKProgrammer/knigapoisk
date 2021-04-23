@@ -1,5 +1,5 @@
 $(window).scroll(function(){
-      if ($(this).scrollTop() > 300) {
+      if ($(this).scrollTop() > -10) {
           $('.nava').addClass('fixed');
       } else {
           $('.nava').removeClass('fixed');

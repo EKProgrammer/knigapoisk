@@ -82,8 +82,6 @@ jQuery(document).ready(function($){
 	}
 });
 
-/* 	Detect "transform-style: preserve-3d" support, or update csstransforms3d for IE10 ? #762
-	https://github.com/Modernizr/Modernizr/issues/762 */
 (function getPerspective(){
   var element = document.createElement('p'),
       html = document.getElementsByTagName('html')[0],
@@ -131,7 +129,7 @@ $(document).ready(function(){
 	});
 });
 
-/*Dropdown Menu*/
+
 $('.dropdown').click(function () {
         $(this).attr('tabindex', 1).focus();
         $(this).toggleClass('active');
@@ -145,7 +143,7 @@ $('.dropdown').click(function () {
         $(this).parents('.dropdown').find('span').text($(this).text());
         $(this).parents('.dropdown').find('input').attr('value', $(this).attr('id'));
     });
-/*End Dropdown Menu*/
+
 
 
 $('.dropdown-menu li').click(function () {
