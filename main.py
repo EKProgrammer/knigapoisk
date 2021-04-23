@@ -7,6 +7,7 @@ import requests
 
 from random import choice, sample
 from shutil import copy
+import os
 
 # поговорки
 from data.sayings import SAYINGS
@@ -38,6 +39,10 @@ APIKEY = 'AIzaSyDhh89odNoM6HWTlJQzfQ-_tbYHf-jncdQ'
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
+        # обработка ошибки
+        if '/' in request.form['q']:
+            return render_template('index.html', saying=choice(SAYINGS), title='Книгапоиск',
+                                   message='Символ "/" нельзя использовать в поисковом запросе.')
         return redirect(f"/search/{request.form['q'].replace(' ', '+')}")
     return render_template('index.html', saying=choice(SAYINGS),
                            title='Книгапоиск')
@@ -59,7 +64,6 @@ def get_books_table(response):
                 # делаем срез оставшихся двух книг или одной книги
                 slice = response['items'][row_index * 3:]
             for book in slice:
-                print(book)
                 row.append(book_parse(book))
             books.append(row)
     return books
@@ -117,7 +121,8 @@ def user_recommendations():
     # Если избранных книг нет значит и рекомендаций нет
     if tags:
         # ключи для того, чтобы не получить ошибку в get_books_table()
-        books = {'totalItems': 1, 'items': []}
+        books = {'totalItems': 1,
+                 'items': []}
         for param in tags.keys():
             for tag in tags[param]:
                 # Формируем запрос по соответствующему параметру
@@ -153,7 +158,12 @@ def get_tags():
             'inauthor': [],
             'intitle': []}
     # Используем две любые книги
-    for favorite in sample(favorites, 2):
+    if len(favorites) == 1:
+        random_choice = favorites
+    else:
+        random_choice = sample(favorites, 2)
+
+    for favorite in random_choice:
         response = requests.get(
             API_SERVER + '/' + favorite.google_id,
             params={"langRestrict": 'ru', "key": APIKEY}).json()
@@ -245,8 +255,11 @@ def book_parse2(book):
     # Проверка на существование картинки
     if 'image' in book:
         img = book['image']
+    else:
+        img = '/static/img/default_img_book.png'
 
     return [book['Название'], authors, img, book['id']]
+
 
 def get_books_table2(response):
     # Собираю данные из запроса и формурую таблицу с 3 столбцами
@@ -266,6 +279,7 @@ def get_books_table2(response):
             row.append(book)
         books.append(row)
     return books
+
 
 @app.route('/favorites/<user_id>')
 def favorites(user_id):
@@ -335,13 +349,11 @@ def favorites(user_id):
 
         table = get_books_table2(favorite_list)
 
-        return render_template('search.html', books = table,
-                            search_flag=False, title='Рекомендации')
-
+        return render_template('search.html', books=table,
+                               search_flag=False, title='Рекомендации')
 
     else:
         return redirect(f"/error")
-
 
 
 @app.route('/view_book/<google_book_id>')
@@ -368,7 +380,7 @@ def background_process_test():
                 check.append(f[2])
 
         if google_book_id in check:
-            return redirect(f"/error")
+            return redirect("/error")
         else:
             fav = Favorite()
 
@@ -382,15 +394,13 @@ def background_process_test():
 
     else:
         fav = db_sess.query(Favorite).filter(Favorite.user_id == str(current_user.id),
-                                          Favorite.google_id == str(google_book_id)
-                                          ).first()
+                                             Favorite.google_id == str(google_book_id)
+                                             ).first()
         if fav:
             db_sess.delete(fav)
             db_sess.commit()
 
         return redirect(f"/book_information/{google_book_id}")
-
-
 
 
 @app.route('/profile', methods=['GET', 'POST'])
@@ -406,8 +416,8 @@ def profile():
     headers = {'surname': 'Фамилия', 'name': 'Имя', 'email': 'Почта',
                'age': 'Возраст', 'about': 'О себе'}
     # получаем двнные о пользователе
-    user = \
-    requests.get(f'http://localhost:5000/api/users/{current_user.id}').json()[
+    user = requests.get(
+        f'http://localhost:5000/api/users/{current_user.id}').json()[
         'users']
     return render_template('profile.html', user=user, headers=headers,
                            title='Профиль')
@@ -474,6 +484,9 @@ def edit_user():
 @login_required
 def delete_user():
     # удаление пользователя
+    # удаляем его изображение
+    os.remove(f'static/img/profile_img/{current_user.id}.png')
+    # удаляем его самого
     requests.delete(f'http://localhost:5000/api/users/{current_user.id}')
     return redirect('/')
 
@@ -547,6 +560,11 @@ def register():
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404_Not_Found.html'), 404
+
+
+@app.errorhandler(401)
+def page_not_found(e):
+    return render_template('401_Unauthorized.html', title='401 Error'), 401
 
 
 def main():
