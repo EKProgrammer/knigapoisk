@@ -489,7 +489,7 @@ def delete_user():
     # удаляем его изображение
     os.remove(f'static/img/profile_img/{current_user.id}.png')
     # удаляем его самого
-    requests.delete(f'http://localhost:5000/api/users/{current_user.id}')
+    requests.delete(f'https://knigapoisk.herokuapp.com/api/users/{current_user.id}')
     return redirect('/')
 
 
