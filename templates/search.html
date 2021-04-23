@@ -50,7 +50,6 @@
 
 <div class="main">
     {% if search_flag %}
-        <a href="/category_search">Поиск по категориям</a>
         <form class="form_search" method="post">
                 <div class="col-3">
                     <input class="effect-8" name="q" type="text" placeholder="Поиск книг"  aria-label="Search" required>
@@ -71,10 +70,10 @@
                       </div>
 
                         <div class="container">
-                            <span class="choose">Категории</span>
 
-                              <div class="dropdown">
+                              <div style="margin-left: 5%;border: 4px double black;margin-top: 2%;" class="dropdown">
                                 <div class="select">
+                                    <span>Выберите категорию</span>
                                   <i class="fa fa-chevron-left"></i>
                                 </div>
                                 <input name="subject" type="hidden" name="gender">

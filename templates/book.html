@@ -12,17 +12,19 @@
 
             <div style="width: 50%; float: left">
             <!-- аргумент как часть пути -->
-                <form action="/background_process_test/" method="POST">
+                <form style="margin-bottom: 15%;" action="/background_process_test/" method="POST">
                     <!-- скрытый параметр -->
                      {% if fav_check %}
                          <input type="hidden" name="google_book_id" value="{{ google_book_id }}">
                          <input type="hidden" name="delete_flag" value="1">
-                        <input type="submit" class="like-button" value="Удалить из избранного">
+                         <span style="float: left; width: 100%">Удалить из избранного</span>
+                        <button style="float: left; margin-bottom: 5%;margin-top: 5%; margin-left: 5%;" type="submit" class="like-button liked" ></button>
 
                     {% else %}
                          <input type="hidden" name="google_book_id" value="{{ google_book_id }}">
                          <input type="hidden" name="delete_flag" value="0">
-                        <input type="submit" class="like-button" value="Добавить в избранное">
+                         <span style="float: left; width: 100%">Добавить в избранное</span>
+                        <button style="float: left; margin-bottom: 5%;margin-top: 5%; margin-left: 5%;" type="submit" class="like-button"></button>
                     {% endif %}
 
                 </form>

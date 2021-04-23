@@ -180,6 +180,7 @@ def get_tags():
 
 
 @app.route('/book_information/<google_book_id>')
+@login_required
 def book_information(google_book_id):
     # Выводим информацию о книге
     response = requests.get(API_SERVER + '/' + google_book_id,
@@ -282,6 +283,7 @@ def get_books_table2(response):
 
 
 @app.route('/favorites/<user_id>')
+@login_required
 def favorites(user_id):
     if int(current_user.id) == int(user_id):
         # Выводим информацию о книге
