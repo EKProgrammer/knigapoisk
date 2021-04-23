@@ -12,22 +12,24 @@
 
             <div style="width: 50%; float: left">
             <!-- аргумент как часть пути -->
-                <form style="margin-bottom: 15%;" action="/background_process_test/" method="POST">
-                    <!-- скрытый параметр -->
-                     {% if fav_check %}
-                         <input type="hidden" name="google_book_id" value="{{ google_book_id }}">
-                         <input type="hidden" name="delete_flag" value="1">
-                         <span style="float: left; width: 100%">Удалить из избранного</span>
-                        <button style="float: left; margin-bottom: 5%;margin-top: 5%; margin-left: 5%;" type="submit" class="like-button liked" ></button>
+                {% if current_user.is_authenticated %}
+                    <form style="margin-bottom: 15%;" action="/background_process_test/" method="POST">
+                        <!-- скрытый параметр -->
+                         {% if fav_check %}
+                             <input type="hidden" name="google_book_id" value="{{ google_book_id }}">
+                             <input type="hidden" name="delete_flag" value="1">
+                             <span style="float: left; width: 100%">Удалить из избранного</span>
+                            <button style="float: left; margin-bottom: 5%;margin-top: 5%; margin-left: 5%;" type="submit" class="like-button liked" ></button>
 
-                    {% else %}
-                         <input type="hidden" name="google_book_id" value="{{ google_book_id }}">
-                         <input type="hidden" name="delete_flag" value="0">
-                         <span style="float: left; width: 100%">Добавить в избранное</span>
-                        <button style="float: left; margin-bottom: 5%;margin-top: 5%; margin-left: 5%;" type="submit" class="like-button"></button>
-                    {% endif %}
+                        {% else %}
+                             <input type="hidden" name="google_book_id" value="{{ google_book_id }}">
+                             <input type="hidden" name="delete_flag" value="0">
+                             <span style="float: left; width: 100%">Добавить в избранное</span>
+                            <button style="float: left; margin-bottom: 5%;margin-top: 5%; margin-left: 5%;" type="submit" class="like-button"></button>
+                        {% endif %}
+                    </form>
+                {% endif %}
 
-                </form>
                 <!--<button  style="margin-bottom: 50px" class="like-button"></button>-->
                 {% for key in book %}
                     <h3>{{ key }}</h3>

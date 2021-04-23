@@ -180,22 +180,24 @@ def get_tags():
 
 
 @app.route('/book_information/<google_book_id>')
-@login_required
 def book_information(google_book_id):
     # Выводим информацию о книге
     response = requests.get(API_SERVER + '/' + google_book_id,
                             params={"langRestrict": 'ru', "key": APIKEY}).json()
 
-    db_sess = db_session.create_session()
-    check = []
-    for favorite_ in db_sess.query(Favorite).all():
-        f = str(favorite_)
-        f = f.split()
-        if int(f[1]) == int(current_user.id):
-            check.append(f[2])
+    if current_user.is_authenticated:
+        db_sess = db_session.create_session()
+        check = []
+        for favorite_ in db_sess.query(Favorite).all():
+            f = str(favorite_)
+            f = f.split()
+            if int(f[1]) == int(current_user.id):
+                check.append(f[2])
 
-    if google_book_id in check:
-        fav = True
+        if google_book_id in check:
+            fav = True
+        else:
+            fav = False
     else:
         fav = False
 
@@ -578,8 +580,8 @@ def main():
     # для одного объекта
     api.add_resource(users_resource.UsersResource, '/api/users/<int:users_id>')
 
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    #port = int(os.environ.get("PORT", 5000))
+    app.run() #host='0.0.0.0', port=port)
 
 
 if __name__ == '__main__':
