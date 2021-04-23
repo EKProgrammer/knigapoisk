@@ -419,7 +419,7 @@ def profile():
                'age': 'Возраст', 'about': 'О себе'}
     # получаем двнные о пользователе
     user = requests.get(
-        f'http://localhost:5000/api/users/{current_user.id}').json()[
+        f'https://knigapoisk.herokuapp.com/api/users/{current_user.id}').json()[
         'users']
     return render_template('profile.html', user=user, headers=headers,
                            title='Профиль')
@@ -580,6 +580,7 @@ def main():
 
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
+
 
 if __name__ == '__main__':
     main()
