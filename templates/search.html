@@ -85,7 +85,7 @@
                                     <li id="BUSINESS">БИЗНЕС</li>
                                     <li id="COMICS">КОМИКС</li>
                                     <li id="COMPUTERS">КОМПЬЮТЕРЫ</li>
-                                    <li id="COOKING">кулинария</li>
+                                    <li id="COOKING">КУЛИНАРИЯ</li>
                                     <li id="HOBBIES">ХОББИ</li>
                                     <li id="DESIGN">ДИЗАЙН</li>
                                     <li id="DRAMA">ДРАМА</li>
@@ -146,6 +146,10 @@
             <tr>
             {% endfor %}
         </table>
+        {% if there_are_no_favorites_books %}
+            <h2>Пока нет избранных книг.</h2>
+            <h2>Чтобы добавить в "Избранное" книгу, нажмите на значок "&#10084;" на её странице.<h2>
+        {% endif %}
     {% elif not books and not search_flag %}
         <h2>Пока нет рекомендаций для Вас.</h2>
         <h2>Добавляйте понравившиеся книги в "Избранное", чтобы мы могли предложить Вам книги для ознакомления. </h2>

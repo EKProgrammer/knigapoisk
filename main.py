@@ -353,11 +353,16 @@ def favorites(user_id):
 
         table = get_books_table2(favorite_list)
 
-        return render_template('search.html', books=table,
-                               search_flag=False, title='Рекомендации')
+        if table == [[]]:
+            there_are_no_favorites_books = True
+        else:
+            there_are_no_favorites_books = False
+
+        return render_template('search.html', books=table, search_flag=False,
+                               there_are_no_favorites_books=there_are_no_favorites_books)
 
     else:
-        return redirect(f"/error")
+        return redirect("/error")
 
 
 @app.route('/view_book/<google_book_id>')
@@ -374,7 +379,6 @@ def background_process_test():
     check = []
     google_book_id = request.form['google_book_id']
     flag = int(request.form['delete_flag'])
-    # print(current_user.id)
 
     if flag == 0:
         for favorite_ in db_sess.query(Favorite).all():
@@ -419,7 +423,7 @@ def profile():
     # headers нужен для правильного порядка следования заголовков
     headers = {'surname': 'Фамилия', 'name': 'Имя', 'email': 'Почта',
                'age': 'Возраст', 'about': 'О себе'}
-    # получаем двнные о пользователе
+    # получаем данные о пользователе
     user = requests.get(
         f'https://knigapoisk.herokuapp.com/api/users/{current_user.id}').json()[
         'users']
@@ -567,7 +571,7 @@ def page_not_found(e):
 
 
 @app.errorhandler(401)
-def page_not_found(e):
+def page_not_found2(e):
     return render_template('401_Unauthorized.html', title='401 Error'), 401
 
 
@@ -580,8 +584,8 @@ def main():
     # для одного объекта
     api.add_resource(users_resource.UsersResource, '/api/users/<int:users_id>')
 
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    # port = int(os.environ.get("PORT", 5000))
+    app.run()  # host='0.0.0.0', port=port)
 
 
 if __name__ == '__main__':
