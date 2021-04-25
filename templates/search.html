@@ -138,9 +138,8 @@
                             <img src="{{ book[2] }}">
                             <h3>{{ book[0] }}</h3>
                             <h4>{{ book[1] }}</h4>
-                        </div>
-                    </a>
-                    {% if fav_delete_flag %}
+
+                            {% if fav_delete_flag %}
                         <form action="/background_process_test/" method="POST">
                             <input type="hidden" name="google_book_id" value="{{ book[3] }}">
                             <input type="hidden" name="delete_flag" value="1">
@@ -148,6 +147,10 @@
                             <button class="btn btn-outline-danger" type="submit">X</button>
                         </form>
                     {% endif %}
+                        </div>
+
+                    </a>
+
                 {% endfor %}
             <tr>
             {% endfor %}
