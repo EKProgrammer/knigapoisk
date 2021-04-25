@@ -359,7 +359,8 @@ def favorites(user_id):
             there_are_no_favorites_books = False
 
         return render_template('search.html', books=table, search_flag=False,
-                               there_are_no_favorites_books=there_are_no_favorites_books)
+                               there_are_no_favorites_books=there_are_no_favorites_books,
+                               fav_delete_flag=True)
 
     else:
         return redirect("/error")
@@ -379,6 +380,7 @@ def background_process_test():
     check = []
     google_book_id = request.form['google_book_id']
     flag = int(request.form['delete_flag'])
+    redirect_link = request.form['redirect_link']
 
     if flag == 0:
         for favorite_ in db_sess.query(Favorite).all():
@@ -398,7 +400,7 @@ def background_process_test():
             db_sess.add(fav)
             db_sess.commit()
 
-            return redirect(f"/book_information/{google_book_id}")
+            return redirect(redirect_link)
 
     else:
         fav = db_sess.query(Favorite).filter(Favorite.user_id == str(current_user.id),
@@ -408,7 +410,7 @@ def background_process_test():
             db_sess.delete(fav)
             db_sess.commit()
 
-        return redirect(f"/book_information/{google_book_id}")
+        return redirect(redirect_link)
 
 
 @app.route('/profile', methods=['GET', 'POST'])
@@ -427,6 +429,9 @@ def profile():
     user = requests.get(
         f'https://knigapoisk.herokuapp.com/api/users/{current_user.id}').json()[
         'users']
+    # user = requests.get(
+    #     f'http://localhost:5000/api/users/{current_user.id}').json()[
+    #     'users']
     return render_template('profile.html', user=user, headers=headers,
                            title='Профиль')
 
@@ -496,6 +501,7 @@ def delete_user():
     os.remove(f'static/img/profile_img/{current_user.id}.png')
     # удаляем его самого
     requests.delete(f'https://knigapoisk.herokuapp.com/api/users/{current_user.id}')
+    # requests.delete(f'http://localhost:5000/api/users/{current_user.id}')
     return redirect('/')
 
 
@@ -590,15 +596,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# db_sess = db_session.create_session() Создаю ссесию
-#    check = [] список  подходящими ключами
-#
-#    for favorite_ in db_sess.query(Favorite).all(): перебираю всю таблицу
-#        f = str(favorite_)
-#        f = f.split()
-#        if int(f[1]) == int(current_user.id): если нахожу совпадение с id пользователя
-#            check.append(f[2]) то добавляю в список
-#  f[0] - id избранного
-#  f[1] - id пользователя
-#  f[2] - id google book

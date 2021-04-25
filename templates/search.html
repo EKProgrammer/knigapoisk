@@ -30,15 +30,16 @@
             <!-- Авторизованный пользователь  -->
             <li><a href="/user_recommendations">Рекомендации</a></li>
             <li><a href="/favorites/{{ current_user.id }}">Избранное</a></li>
-            <li style="margin-left: 13%"><a href="/profile">{{ current_user.name }} <!-- <p style="font-size: 12px;margin-top:0%">Новичек</p> !--></a></li>
-
+            <li style="margin-left: 13%">
+                <a href="/profile">
+                    {{ current_user.name }}
+                </a>
+            </li>
              <li><a href="/logout">Выйти</a></li>
         {% else %}
             <!-- Неавторизованный пользователь  -->
-            <p>
-            <li style="margin-left: 13%"><a href="/register">Зарегистрироваться <!-- <p style="font-size: 12px;margin-top:0%">Новичек</p> !--></a></li>
-            <li><a href="/login">Войти <!-- <p style="font-size: 12px;margin-top:0%">Новичек</p> !--></a></li>
-            </p>
+            <li style="margin-left: 13%"><a href="/register">Зарегистрироваться</a></li>
+            <li><a href="/login">Войти</a></li>
         {% endif %}
 
 
@@ -55,9 +56,6 @@
                     <input class="effect-8" name="q" type="text" placeholder="Поиск книг"  aria-label="Search" required>
                       <span class="focus-border"></span>
                   </div>
-
-                    <!--<input name="q" class="form-control me-2" type="search"
-                           placeholder="Поиск книг" aria-label="Search" required>-->
 
                     <a class="content_toggle" href="#">Фильтры</a>
 
@@ -142,6 +140,14 @@
                             <h4>{{ book[1] }}</h4>
                         </div>
                     </a>
+                    {% if fav_delete_flag %}
+                        <form action="/background_process_test/" method="POST">
+                            <input type="hidden" name="google_book_id" value="{{ book[3] }}">
+                            <input type="hidden" name="delete_flag" value="1">
+                            <input type="hidden" name="redirect_link" value="/favorites/{{ current_user.id }}">
+                            <button class="btn btn-outline-danger" type="submit">X</button>
+                        </form>
+                    {% endif %}
                 {% endfor %}
             <tr>
             {% endfor %}

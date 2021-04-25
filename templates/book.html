@@ -18,19 +18,21 @@
                          {% if fav_check %}
                              <input type="hidden" name="google_book_id" value="{{ google_book_id }}">
                              <input type="hidden" name="delete_flag" value="1">
+                             <input type="hidden" name="redirect_link" value="/book_information/{{ google_book_id }}">
                              <span style="float: left; width: 100%">Удалить из избранного</span>
-                            <button style="float: left; margin-bottom: 5%;margin-top: 5%; margin-left: 5%;" type="submit" class="like-button liked" ></button>
+                             <button style="float: left; margin-bottom: 5%;margin-top: 5%; margin-left: 5%;" type="submit" class="like-button liked" ></button>
 
                         {% else %}
                              <input type="hidden" name="google_book_id" value="{{ google_book_id }}">
                              <input type="hidden" name="delete_flag" value="0">
+                             <input type="hidden" name="redirect_link" value="/book_information/{{ google_book_id }}">
                              <span style="float: left; width: 100%">Добавить в избранное</span>
-                            <button style="float: left; margin-bottom: 5%;margin-top: 5%; margin-left: 5%;" type="submit" class="like-button"></button>
+                             <button style="float: left; margin-bottom: 5%;margin-top: 5%; margin-left: 5%;" type="submit" class="like-button"></button>
                         {% endif %}
                     </form>
                 {% endif %}
 
-                <!--<button  style="margin-bottom: 50px" class="like-button"></button>-->
+
                 {% for key in book %}
                     <h3>{{ key }}</h3>
                     <h5>{{ book[key] }}</h5>

@@ -44,21 +44,16 @@
             <!-- Авторизованный пользователь  -->
             <li><a href="/user_recommendations">Рекомендации</a></li>
             <li><a href="/favorites/{{ current_user.id }}">Избранное</a></li>
-            <li style="margin-left: 13%"><a href="/profile">{{ current_user.name }} <!-- <p style="font-size: 12px;margin-top:0%">Новичек</p> !--></a></li>
-                <!--<button class="btn btn dropdown-toggle" type="button"
-                        id="dropdownMenuButton1" data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                  <img src="/static/img/2.png">
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                    <li><a class="dropdown-item" href="/profile">Профиль</a></li>
-                    <li><a class="dropdown-item" href="/logout">Выйти</a></li>
-                </ul>-->
+            <li style="margin-left: 13%">
+                <a href="/profile">
+                    {{ current_user.name }}
+                </a>
+            </li>
             <li><a href="/logout">Выйти</a></li>
         {% else %}
             <!-- Неавторизованный пользователь  -->
-            <li style="margin-left: 13%"><a href="/register">Зарегистрироваться <!-- <p style="font-size: 12px;margin-top:0%">Новичек</p> !--></a></li>
-            <li><a href="/login">Войти <!-- <p style="font-size: 12px;margin-top:0%">Новичек</p> !--></a></li>
+            <li style="margin-left: 13%"><a href="/register">Зарегистрироваться</a></li>
+            <li><a href="/login">Войти</a></li>
         {% endif %}
 
 
