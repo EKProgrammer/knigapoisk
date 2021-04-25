@@ -138,16 +138,16 @@
                             <img src="{{ book[2] }}">
                             <h3>{{ book[0] }}</h3>
                             <h4>{{ book[1] }}</h4>
+                            {% if fav_delete_flag %}
+                                <form action="/background_process_test/" method="POST">
+                                    <input type="hidden" name="google_book_id" value="{{ book[3] }}">
+                                    <input type="hidden" name="delete_flag" value="1">
+                                    <input type="hidden" name="redirect_link" value="/favorites/{{ current_user.id }}">
+                                    <button style="width: 30%; margin-left: 50px" class="btn btn-outline-danger" type="submit">X</button>
+                                </form>
+                            {% endif %}
                         </div>
                     </a>
-                    {% if fav_delete_flag %}
-                        <form action="/background_process_test/" method="POST">
-                            <input type="hidden" name="google_book_id" value="{{ book[3] }}">
-                            <input type="hidden" name="delete_flag" value="1">
-                            <input type="hidden" name="redirect_link" value="/favorites/{{ current_user.id }}">
-                            <button class="btn btn-outline-danger" type="submit">X</button>
-                        </form>
-                    {% endif %}
                 {% endfor %}
             <tr>
             {% endfor %}

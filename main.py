@@ -72,6 +72,10 @@ def get_books_table(response):
 def book_parse(book):
     # получаем информацию о книге в нужном для нас формате
     info = book['volumeInfo']
+    if len(info['title']) > 100:
+        title = info['title'][:100] + '...'
+    else:
+        title = info['title']
     if 'authors' in info:
         # Авторов может быть несколько
         authors = ', '.join(info['authors'])
@@ -82,7 +86,7 @@ def book_parse(book):
         img = info['imageLinks']['thumbnail']
     else:
         img = '/static/img/default_img_book.png'
-    return [info['title'], authors, img, book['id']]
+    return [title, authors, img, book['id']]
 
 
 @app.route('/search/<q>', methods=['GET', 'POST'])
@@ -250,6 +254,10 @@ def book_information(google_book_id):
 
 def book_parse2(book):
     # получаем информацию о книге в нужном для нас формате
+    if len(book['Название']) > 100:
+        title = book['Название'][:100] + '...'
+    else:
+        title = book['Название']
     if 'Авторы' in book:
         # Авторов может быть несколько
         authors = ', '.join(book['Авторы'].split())
@@ -261,7 +269,7 @@ def book_parse2(book):
     else:
         img = '/static/img/default_img_book.png'
 
-    return [book['Название'], authors, img, book['id']]
+    return [title, authors, img, book['id']]
 
 
 def get_books_table2(response):
